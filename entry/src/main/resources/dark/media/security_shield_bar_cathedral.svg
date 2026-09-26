@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 1240" width="1240" height="1240">
+  <!-- HarmonyOS Symbol "security_shield" 字形导出：中央竖条 + 双层泛光（爆炸扩散段随线条一同淡出） -->
+  <!-- 竖条主题色比左右线条更深一档：深色 #B3A8D6 55%/70% 混入白（线条为 45%/60%） -->
+  <defs>
+    <linearGradient id="shieldGlass" x1="0" y1="1000" x2="0" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" style="stop-color:rgb(213,207,233);stop-opacity:0.901961" />
+      <stop offset="100%" style="stop-color:rgb(202,194,226);stop-opacity:0.301961" />
+    </linearGradient>
+    <linearGradient id="shieldBloom" x1="0" y1="1000" x2="0" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" style="stop-color:rgb(213,207,233);stop-opacity:1" />
+      <stop offset="100%" style="stop-color:rgb(202,194,226);stop-opacity:0.55" />
+    </linearGradient>
+    <filter id="lineBloomWide" x="-87%" y="-41%" width="374%" height="282%">
+      <feGaussianBlur stdDeviation="30" />
+    </filter>
+    <filter id="lineBloom" x="-45%" y="-23%" width="290%" height="246%">
+      <feGaussianBlur stdDeviation="14" />
+    </filter>
+  </defs>
+  <g transform="translate(120 120) translate(0 880) scale(1 -1)" fill-rule="nonzero">
+    <g filter="url(#lineBloomWide)" fill="url(#shieldBloom)" opacity="0.9">
+      <path id="middle-bar-bloom-wide" d="M443 265H557V536H443Z"/>
+    </g>
+    <g filter="url(#lineBloom)" fill="url(#shieldBloom)">
+      <path id="middle-bar-bloom" d="M443 265H557V536H443Z"/>
+    </g>
+    <g fill="url(#shieldGlass)">
+      <path id="middle-bar" d="M443 265H557V536H443Z"/>
+    </g>
+  </g>
+</svg>

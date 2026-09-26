@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1600" width="1600" height="1600">
+  <!-- security_shield 融化态：线条高斯模糊融入内部 + 轮廓剪影径向渐变（外强内浅的实心盾牌） -->
+  <!-- 深色：#8AC18A 55%/70% 混入白（剪影 22%），不透明度整体调低：更通透、白色更少 -->
+  <!-- 画布外扩 300/边，组件按 1600/1000 倍尺寸放置以与线条层对齐 -->
+  <defs>
+    <linearGradient id="shieldGlass" x1="0" y1="1000" x2="0" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" style="stop-color:rgb(191,221,191);stop-opacity:0.560784" />
+      <stop offset="100%" style="stop-color:rgb(173,212,173);stop-opacity:0.168627" />
+    </linearGradient>
+    <radialGradient id="inward" cx="500" cy="380" r="500" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" style="stop-color:rgb(229,241,229);stop-opacity:0.25" />
+      <stop offset="60%" style="stop-color:rgb(229,241,229);stop-opacity:0.36" />
+      <stop offset="100%" style="stop-color:rgb(229,241,229);stop-opacity:0.55" />
+    </radialGradient>
+    <filter id="shieldMelt" x="-37%" y="-32%" width="274%" height="264%">
+      <feGaussianBlur stdDeviation="70" />
+    </filter>
+  </defs>
+  <g transform="translate(300 300) translate(0 880) scale(1 -1)">
+    <path id="shield-silhouette" d="M891.0 380.0 L886.0 298.0 L878.0 261.0 L863.0 215.0 L841.0 167.0 L825.0 140.0 L796.0 99.0 L754.0 49.0 L718.0 16.0 L679.0 -13.0 L595.5 -60.5 C520.8 -103.0 480.9 -107.7 405.5 -66.5 L348.0 -35.0 L272.0 24.0 L223.0 74.0 L187.0 118.0 L162.0 157.0 L143.0 195.0 L121.0 261.0 L110.0 333.0 L110.0 668.0 L115.0 686.0 L127.0 705.0 L149.0 725.0 L176.0 740.0 L410.0 831.1 C475.9 867.2 521.0 858.4 591.0 831.2 L820.0 742.0 L843.0 730.0 L876.0 702.0 L886.0 682.0 L891.0 650.0 Z" fill="url(#inward)" fill-rule="nonzero"/>
+    <g fill="url(#shieldGlass)" fill-rule="nonzero" filter="url(#shieldMelt)">
+      <path id="shield-left" d="M110 656V359Q111 268 145.5 191.0Q180 114 250 46Q293 3 327.5 -21.0Q362 -45 412 -70L453 -89V11Q401 37 369.0 59.5Q337 82 313 107Q255 168 226.5 230.5Q198 293 198 365V630Q198 643 203.5 650.5Q209 658 223 663L453 755V849L187 744Q153 731 131.5 708.5Q110 686 110 656Z"/>
+      <path id="shield-right" d="M547 755 777 663Q790 658 796.0 651.0Q802 644 803 630V365Q802 293 773.5 230.5Q745 168 687 107Q664 83 631.5 60.5Q599 38 547 11V-89Q637 -41 679.5 -13.0Q722 15 751 46Q819 117 854.5 193.5Q890 270 891 359V651Q891 686 870.5 708.0Q850 730 814 744L547 849Z"/>
+    </g>
+  </g>
+</svg>

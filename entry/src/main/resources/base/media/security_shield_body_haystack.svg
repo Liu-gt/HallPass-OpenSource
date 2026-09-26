@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 1240" width="1240" height="1240">
+  <!-- HarmonyOS Symbol "security_shield" 字形导出（HMSymbolVF.ttf），1em = 1000 单位 -->
+  <!-- 玻璃盾：剪影淡填充（内部浅渐变）+ 双层强泛光（近线 σ14 + 外扩 σ30）+ 清晰线条 -->
+  <!-- 浅色：#C77E3D 45%/60% 混入白（融化态 12%/22%）；画布外扩 120/边给泛光留余量，组件按 1240/1000 倍尺寸放置 -->
+  <defs>
+    <linearGradient id="shieldGlass" x1="0" y1="1000" x2="0" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" style="stop-color:rgb(230,197,168);stop-opacity:0.901961" />
+      <stop offset="100%" style="stop-color:rgb(221,178,139);stop-opacity:0.301961" />
+    </linearGradient>
+    <linearGradient id="shieldBloom" x1="0" y1="1000" x2="0" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" style="stop-color:rgb(230,197,168);stop-opacity:1" />
+      <stop offset="100%" style="stop-color:rgb(221,178,139);stop-opacity:0.55" />
+    </linearGradient>
+    <radialGradient id="shieldInterior" cx="500" cy="380" r="500" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" style="stop-color:rgb(249,242,235);stop-opacity:0.06" />
+      <stop offset="70%" style="stop-color:rgb(249,242,235);stop-opacity:0.16" />
+      <stop offset="100%" style="stop-color:rgb(249,242,235);stop-opacity:0.32" />
+    </radialGradient>
+    <filter id="lineBloomWide" x="-20%" y="-18%" width="240%" height="236%">
+      <feGaussianBlur stdDeviation="30" />
+    </filter>
+    <filter id="lineBloom" x="-13%" y="-12%" width="226%" height="224%">
+      <feGaussianBlur stdDeviation="14" />
+    </filter>
+  </defs>
+  <g transform="translate(120 120) translate(0 880) scale(1 -1)" fill-rule="nonzero">
+    <path id="shield-interior" d="M891.0 380.0 L886.0 298.0 L878.0 261.0 L863.0 215.0 L841.0 167.0 L825.0 140.0 L796.0 99.0 L754.0 49.0 L718.0 16.0 L679.0 -13.0 L595.5 -60.5 C520.8 -103.0 480.9 -107.7 405.5 -66.5 L348.0 -35.0 L272.0 24.0 L223.0 74.0 L187.0 118.0 L162.0 157.0 L143.0 195.0 L121.0 261.0 L110.0 333.0 L110.0 668.0 L115.0 686.0 L127.0 705.0 L149.0 725.0 L176.0 740.0 L410.0 831.1 C475.9 867.2 521.0 858.4 591.0 831.2 L820.0 742.0 L843.0 730.0 L876.0 702.0 L886.0 682.0 L891.0 650.0 Z" fill="url(#shieldInterior)"/>
+    <g filter="url(#lineBloomWide)" fill="url(#shieldBloom)" opacity="0.9">
+      <path id="shield-left-bloom-wide" d="M110 656V359Q111 268 145.5 191.0Q180 114 250 46Q293 3 327.5 -21.0Q362 -45 412 -70L453 -89V11Q401 37 369.0 59.5Q337 82 313 107Q255 168 226.5 230.5Q198 293 198 365V630Q198 643 203.5 650.5Q209 658 223 663L453 755V849L187 744Q153 731 131.5 708.5Q110 686 110 656Z"/>
+      <path id="shield-right-bloom-wide" d="M547 755 777 663Q790 658 796.0 651.0Q802 644 803 630V365Q802 293 773.5 230.5Q745 168 687 107Q664 83 631.5 60.5Q599 38 547 11V-89Q637 -41 679.5 -13.0Q722 15 751 46Q819 117 854.5 193.5Q890 270 891 359V651Q891 686 870.5 708.0Q850 730 814 744L547 849Z"/>
+    </g>
+    <g filter="url(#lineBloom)" fill="url(#shieldBloom)">
+      <path id="shield-left-bloom" d="M110 656V359Q111 268 145.5 191.0Q180 114 250 46Q293 3 327.5 -21.0Q362 -45 412 -70L453 -89V11Q401 37 369.0 59.5Q337 82 313 107Q255 168 226.5 230.5Q198 293 198 365V630Q198 643 203.5 650.5Q209 658 223 663L453 755V849L187 744Q153 731 131.5 708.5Q110 686 110 656Z"/>
+      <path id="shield-right-bloom" d="M547 755 777 663Q790 658 796.0 651.0Q802 644 803 630V365Q802 293 773.5 230.5Q745 168 687 107Q664 83 631.5 60.5Q599 38 547 11V-89Q637 -41 679.5 -13.0Q722 15 751 46Q819 117 854.5 193.5Q890 270 891 359V651Q891 686 870.5 708.0Q850 730 814 744L547 849Z"/>
+    </g>
+    <g fill="url(#shieldGlass)">
+      <path id="shield-left" d="M110 656V359Q111 268 145.5 191.0Q180 114 250 46Q293 3 327.5 -21.0Q362 -45 412 -70L453 -89V11Q401 37 369.0 59.5Q337 82 313 107Q255 168 226.5 230.5Q198 293 198 365V630Q198 643 203.5 650.5Q209 658 223 663L453 755V849L187 744Q153 731 131.5 708.5Q110 686 110 656Z"/>
+      <path id="shield-right" d="M547 755 777 663Q790 658 796.0 651.0Q802 644 803 630V365Q802 293 773.5 230.5Q745 168 687 107Q664 83 631.5 60.5Q599 38 547 11V-89Q637 -41 679.5 -13.0Q722 15 751 46Q819 117 854.5 193.5Q890 270 891 359V651Q891 686 870.5 708.0Q850 730 814 744L547 849Z"/>
+    </g>
+  </g>
+</svg>

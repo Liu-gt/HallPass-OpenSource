@@ -1,0 +1,1104 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "HallPass"
+    },
+    {
+      "name": "tab_vault",
+      "value": "保管库"
+    },
+    {
+      "name": "tab_generator",
+      "value": "生成器"
+    },
+    {
+      "name": "tab_settings",
+      "value": "设置"
+    },
+    {
+      "name": "vault_title",
+      "value": "保管库"
+    },
+    {
+      "name": "search_hint",
+      "value": "搜索密码、笔记等"
+    },
+    {
+      "name": "filter_all",
+      "value": "全部"
+    },
+    {
+      "name": "filter_favorites",
+      "value": "收藏"
+    },
+    {
+      "name": "filter_login",
+      "value": "登录"
+    },
+    {
+      "name": "filter_note",
+      "value": "笔记"
+    },
+    {
+      "name": "filter_card",
+      "value": "银行卡"
+    },
+    {
+      "name": "filter_identity",
+      "value": "身份"
+    },
+    {
+      "name": "filter_folder",
+      "value": "文件夹"
+    },
+    {
+      "name": "folder_all",
+      "value": "全部文件夹"
+    },
+    {
+      "name": "folder_none",
+      "value": "未分组"
+    },
+    {
+      "name": "swipe_copy_password",
+      "value": "复制密码"
+    },
+    {
+      "name": "swipe_copy_username",
+      "value": "复制用户名"
+    },
+    {
+      "name": "swipe_favorite",
+      "value": "收藏"
+    },
+    {
+      "name": "menu_edit",
+      "value": "编辑"
+    },
+    {
+      "name": "menu_move",
+      "value": "移动文件夹"
+    },
+    {
+      "name": "menu_copy_totp",
+      "value": "复制验证码"
+    },
+    {
+      "name": "menu_delete",
+      "value": "删除"
+    },
+    {
+      "name": "toast_copied",
+      "value": "已复制"
+    },
+    {
+      "name": "empty_title",
+      "value": "暂无条目"
+    },
+    {
+      "name": "empty_hint",
+      "value": "添加你的第一条密码"
+    },
+    {
+      "name": "detail_login",
+      "value": "登录信息"
+    },
+    {
+      "name": "detail_username",
+      "value": "用户名"
+    },
+    {
+      "name": "detail_password",
+      "value": "密码"
+    },
+    {
+      "name": "detail_password_strength",
+      "value": "密码强度"
+    },
+    {
+      "name": "detail_totp",
+      "value": "动态验证码"
+    },
+    {
+      "name": "detail_uri",
+      "value": "网址"
+    },
+    {
+      "name": "detail_note",
+      "value": "备注"
+    },
+    {
+      "name": "detail_fields",
+      "value": "自定义字段"
+    },
+    {
+      "name": "detail_attachments",
+      "value": "附件"
+    },
+    {
+      "name": "detail_meta",
+      "value": "更多"
+    },
+    {
+      "name": "detail_folder",
+      "value": "文件夹"
+    },
+    {
+      "name": "detail_updated",
+      "value": "更新于"
+    },
+    {
+      "name": "detail_history",
+      "value": "密码历史"
+    },
+    {
+      "name": "detail_card_holder",
+      "value": "持卡人"
+    },
+    {
+      "name": "detail_card_number",
+      "value": "卡号"
+    },
+    {
+      "name": "detail_card_brand",
+      "value": "品牌"
+    },
+    {
+      "name": "detail_card_expiry",
+      "value": "有效期"
+    },
+    {
+      "name": "detail_card_code",
+      "value": "安全码"
+    },
+    {
+      "name": "detail_card_exp_month",
+      "value": "有效月份"
+    },
+    {
+      "name": "detail_card_exp_year",
+      "value": "有效年份"
+    },
+    {
+      "name": "detail_id_first_name",
+      "value": "名"
+    },
+    {
+      "name": "detail_id_middle_name",
+      "value": "中间名"
+    },
+    {
+      "name": "detail_id_last_name",
+      "value": "姓"
+    },
+    {
+      "name": "detail_id_company",
+      "value": "公司"
+    },
+    {
+      "name": "detail_id_email",
+      "value": "邮箱"
+    },
+    {
+      "name": "detail_id_phone",
+      "value": "电话"
+    },
+    {
+      "name": "detail_id_ssn",
+      "value": "证件号"
+    },
+    {
+      "name": "detail_id_passport",
+      "value": "护照号"
+    },
+    {
+      "name": "detail_id_license",
+      "value": "驾照号"
+    },
+    {
+      "name": "detail_id_address",
+      "value": "地址"
+    },
+    {
+      "name": "detail_id_city",
+      "value": "城市"
+    },
+    {
+      "name": "detail_id_state",
+      "value": "省/州"
+    },
+    {
+      "name": "detail_id_postal",
+      "value": "邮编"
+    },
+    {
+      "name": "detail_id_country",
+      "value": "国家/地区"
+    },
+    {
+      "name": "edit",
+      "value": "编辑"
+    },
+    {
+      "name": "favorite",
+      "value": "收藏"
+    },
+    {
+      "name": "unfavorite",
+      "value": "取消收藏"
+    },
+    {
+      "name": "field_key",
+      "value": "名称"
+    },
+    {
+      "name": "item_info",
+      "value": "信息"
+    },
+    {
+      "name": "item_name",
+      "value": "条目名称"
+    },
+    {
+      "name": "item_group",
+      "value": "所属组"
+    },
+    {
+      "name": "field_value",
+      "value": "值"
+    },
+    {
+      "name": "field_type_text",
+      "value": "文本"
+    },
+    {
+      "name": "field_type_hidden",
+      "value": "隐藏"
+    },
+    {
+      "name": "field_type_boolean",
+      "value": "布尔值"
+    },
+    {
+      "name": "field_type_linked",
+      "value": "关联"
+    },
+    {
+      "name": "item_name_required",
+      "value": "请填写条目名称"
+    },
+    {
+      "name": "field_name_required",
+      "value": "请填写字段名称"
+    },
+    {
+      "name": "required_fields_missing",
+      "value": "请填写必填字段"
+    },
+    {
+      "name": "gen_title",
+      "value": "生成器"
+    },
+    {
+      "name": "gen_type",
+      "value": "类型"
+    },
+    {
+      "name": "gen_password",
+      "value": "密码"
+    },
+    {
+      "name": "gen_passphrase",
+      "value": "密语"
+    },
+    {
+      "name": "gen_length",
+      "value": "长度"
+    },
+    {
+      "name": "gen_upper",
+      "value": "大写字母"
+    },
+    {
+      "name": "gen_lower",
+      "value": "小写字母"
+    },
+    {
+      "name": "gen_digits",
+      "value": "数字"
+    },
+    {
+      "name": "gen_symbols",
+      "value": "符号"
+    },
+    {
+      "name": "gen_result",
+      "value": "生成结果"
+    },
+    {
+      "name": "gen_refresh",
+      "value": "换一个"
+    },
+    {
+      "name": "gen_copy",
+      "value": "复制"
+    },
+    {
+      "name": "settings_account",
+      "value": "账号"
+    },
+    {
+      "name": "settings_account_email",
+      "value": "登录账号"
+    },
+    {
+      "name": "settings_server",
+      "value": "服务器"
+    },
+    {
+      "name": "settings_signout",
+      "value": "退出登录"
+    },
+    {
+      "name": "settings_security",
+      "value": "安全"
+    },
+    {
+      "name": "settings_autolock",
+      "value": "自动锁定"
+    },
+    {
+      "name": "autolock_1hour",
+      "value": "1 小时后"
+    },
+    {
+      "name": "settings_lock_now",
+      "value": "立即锁定"
+    },
+    {
+      "name": "settings_signout_confirm",
+      "value": "退出后将清除本设备的保管库缓存与快速解锁密钥，确定退出？"
+    },
+    {
+      "name": "autolock_1min",
+      "value": "1 分钟后"
+    },
+    {
+      "name": "autolock_5min",
+      "value": "5 分钟后"
+    },
+    {
+      "name": "autolock_never",
+      "value": "从不"
+    },
+    {
+      "name": "settings_biometric_fingerprint",
+      "value": "指纹解锁"
+    },
+    {
+      "name": "settings_biometric_face",
+      "value": "人脸解锁"
+    },
+    {
+      "name": "settings_biometric_preferred",
+      "value": "优先使用方式"
+    },
+    {
+      "name": "biometric_preferred_fingerprint",
+      "value": "指纹"
+    },
+    {
+      "name": "biometric_preferred_face",
+      "value": "人脸"
+    },
+    {
+      "name": "fast_unlock_verify_failed",
+      "value": "生物识别验证未通过，可重试或稍后在设置开启"
+    },
+    {
+      "name": "settings_entry_lock",
+      "value": "进入应用时验证身份"
+    },
+    {
+      "name": "settings_clipboard",
+      "value": "剪贴板自动清除"
+    },
+    {
+      "name": "settings_clipboard_hint",
+      "value": "复制 30 秒后自动清除；仅作用于系统剪贴板，无法清除输入法历史中的内容"
+    },
+    {
+      "name": "settings_screenshot",
+      "value": "禁止截屏"
+    },
+    {
+      "name": "settings_screenshot_hint",
+      "value": "阻止系统截取应用画面"
+    },
+    {
+      "name": "settings_appearance",
+      "value": "外观"
+    },
+    {
+      "name": "settings_theme",
+      "value": "主题"
+    },
+    {
+      "name": "theme_default",
+      "value": "默认绿"
+    },
+    {
+      "name": "theme_waterlily",
+      "value": "睡莲蓝"
+    },
+    {
+      "name": "theme_cathedral",
+      "value": "紫教堂"
+    },
+    {
+      "name": "theme_rose",
+      "value": "玫瑰粉"
+    },
+    {
+      "name": "theme_haystack",
+      "value": "干草堆"
+    },
+    {
+      "name": "settings_mode",
+      "value": "深浅色"
+    },
+    {
+      "name": "mode_system",
+      "value": "跟随系统"
+    },
+    {
+      "name": "mode_light",
+      "value": "浅色"
+    },
+    {
+      "name": "mode_dark",
+      "value": "深色"
+    },
+    {
+      "name": "settings_general",
+      "value": "通用"
+    },
+    {
+      "name": "settings_sort",
+      "value": "排序方式"
+    },
+    {
+      "name": "sort_name",
+      "value": "按名称"
+    },
+    {
+      "name": "sort_recent",
+      "value": "最近使用"
+    },
+    {
+      "name": "settings_about",
+      "value": "关于"
+    },
+    {
+      "name": "settings_version",
+      "value": "版本"
+    },
+    {
+      "name": "settings_license",
+      "value": "许可证"
+    },
+    {
+      "name": "settings_repo",
+      "value": "开源地址"
+    },
+    {
+      "name": "settings_contact",
+      "value": "联系作者"
+    },
+    {
+      "name": "settings_license_value",
+      "value": "GPL-3.0 或更新版本"
+    },
+    {
+      "name": "settings_copyright",
+      "value": "版权"
+    },
+    {
+      "name": "gen_charset",
+      "value": "字符集"
+    },
+    {
+      "name": "gallery_title",
+      "value": "样式基准"
+    },
+    {
+      "name": "gallery_brand",
+      "value": "品牌色"
+    },
+    {
+      "name": "gallery_neutral",
+      "value": "中性色"
+    },
+    {
+      "name": "gallery_typography",
+      "value": "字号阶梯"
+    },
+    {
+      "name": "gallery_components",
+      "value": "组件"
+    },
+    {
+      "name": "gallery_button",
+      "value": "按钮"
+    },
+    {
+      "name": "gallery_card",
+      "value": "卡片"
+    },
+    {
+      "name": "gallery_row",
+      "value": "列表行"
+    },
+    {
+      "name": "gallery_input",
+      "value": "输入框"
+    },
+    {
+      "name": "gallery_input_hint",
+      "value": "请输入内容"
+    },
+    {
+      "name": "welcome_title",
+      "value": "欢迎"
+    },
+    {
+      "name": "server_title",
+      "value": "选择服务器"
+    },
+    {
+      "name": "login_title",
+      "value": "登录"
+    },
+    {
+      "name": "twofactor_title",
+      "value": "两步验证"
+    },
+    {
+      "name": "unlock_title",
+      "value": "解锁"
+    },
+    {
+      "name": "item_detail_title",
+      "value": "条目详情"
+    },
+    {
+      "name": "item_edit_title",
+      "value": "编辑条目"
+    },
+    {
+      "name": "trash_title",
+      "value": "回收站"
+    },
+    {
+      "name": "placeholder_body",
+      "value": "占位内容，功能即将实现"
+    },
+    {
+      "name": "placeholder_next",
+      "value": "下一步"
+    },
+    {
+      "name": "placeholder_open_detail",
+      "value": "打开详情页"
+    },
+    {
+      "name": "welcome_body",
+      "value": "HallPass 是端到端加密的密码管理器。你的数据在设备上加密后才同步，任何人（包括我们）都无法读取。"
+    },
+    {
+      "name": "welcome_cta",
+      "value": "开始使用"
+    },
+    {
+      "name": "server_official",
+      "value": "官方云 (bitwarden.com)"
+    },
+    {
+      "name": "server_selfhosted",
+      "value": "第三方服务器"
+    },
+    {
+      "name": "server_url_hint",
+      "value": "例如 vaultwarden.example.com"
+    },
+    {
+      "name": "server_url_invalid",
+      "value": "服务器地址无效"
+    },
+    {
+      "name": "continue",
+      "value": "继续"
+    },
+    {
+      "name": "previous_step",
+      "value": "上一步"
+    },
+    {
+      "name": "server_desc",
+      "value": "选择你的数据存放位置，之后可在设置中查看。"
+    },
+    {
+      "name": "login_email_hint",
+      "value": "电子邮箱"
+    },
+    {
+      "name": "login_password_hint",
+      "value": "主密码"
+    },
+    {
+      "name": "login_cta",
+      "value": "登录"
+    },
+    {
+      "name": "login_error_credentials",
+      "value": "主密码或验证码错误"
+    },
+    {
+      "name": "login_error_network",
+      "value": "网络错误，请重试"
+    },
+    {
+      "name": "login_error_server",
+      "value": "服务器错误，请稍后重试"
+    },
+    {
+      "name": "login_busy",
+      "value": "登录中…"
+    },
+    {
+      "name": "login_kdf_slow",
+      "value": "账号 KDF 参数较大，解锁计算可能需要几秒。"
+    },
+    {
+      "name": "twofactor_hint",
+      "value": "输入两步验证码以继续"
+    },
+    {
+      "name": "twofactor_totp",
+      "value": "验证器"
+    },
+    {
+      "name": "twofactor_email",
+      "value": "邮箱验证码"
+    },
+    {
+      "name": "twofactor_code_hint",
+      "value": "6-8 位验证码"
+    },
+    {
+      "name": "twofactor_send_email",
+      "value": "发送验证码"
+    },
+    {
+      "name": "twofactor_other",
+      "value": "当前账号使用的两步验证方式暂不支持，请到其他客户端处理后重试。"
+    },
+    {
+      "name": "twofactor_verify",
+      "value": "验证"
+    },
+    {
+      "name": "twofactor_exhausted",
+      "value": "尝试次数过多，已退回登录。"
+    },
+    {
+      "name": "fast_unlock_title",
+      "value": "开启快速解锁？"
+    },
+    {
+      "name": "fast_unlock_body",
+      "value": "使用生物识别或锁屏凭据代替输入主密码。主密码仍是唯一根凭据。"
+    },
+    {
+      "name": "fast_unlock_enable",
+      "value": "启用"
+    },
+    {
+      "name": "fast_unlock_later",
+      "value": "稍后"
+    },
+    {
+      "name": "fast_unlock_failed",
+      "value": "快速解锁开启失败，可稍后在设置中重试。"
+    },
+    {
+      "name": "twofactor_remember",
+      "value": "记住此设备 30 天"
+    },
+    {
+      "name": "newdevice_title",
+      "value": "新设备验证"
+    },
+    {
+      "name": "newdevice_hint",
+      "value": "首次在此设备登录：我们已向你的邮箱发送验证码，输入以继续。"
+    },
+    {
+      "name": "newdevice_code_hint",
+      "value": "邮箱验证码"
+    },
+    {
+      "name": "newdevice_verify",
+      "value": "验证"
+    },
+    {
+      "name": "newdevice_invalid",
+      "value": "验证码不正确或已过期，请重试；也可返回重新登录获取新验证码。"
+    },
+    {
+      "name": "unlock_biometric",
+      "value": "使用生物识别解锁"
+    },
+    {
+      "name": "unlock_master_entry",
+      "value": "使用主密码"
+    },
+    {
+      "name": "unlock_password_hint",
+      "value": "主密码"
+    },
+    {
+      "name": "unlock_cta",
+      "value": "解锁"
+    },
+    {
+      "name": "unlock_biometric_fallback",
+      "value": "生物识别不可用，请使用主密码解锁。"
+    },
+    {
+      "name": "unlock_biometric_locked",
+      "value": "连续失败次数过多，快速解锁已停用。"
+    },
+    {
+      "name": "delete_confirm_body",
+      "value": "条目将移入回收站，可随时恢复。"
+    },
+    {
+      "name": "cancel",
+      "value": "取消"
+    },
+    {
+      "name": "detail_download_saved",
+      "value": "已保存到所选目录"
+    },
+    {
+      "name": "item_new_title",
+      "value": "新建条目"
+    },
+    {
+      "name": "item_new_login",
+      "value": "新建登录"
+    },
+    {
+      "name": "item_new_note",
+      "value": "新建安全笔记"
+    },
+    {
+      "name": "item_new_card",
+      "value": "新建银行卡"
+    },
+    {
+      "name": "item_new_identity",
+      "value": "新建身份"
+    },
+    {
+      "name": "save_queued",
+      "value": "已保存到离线队列，联网后自动同步"
+    },
+    {
+      "name": "save_failed",
+      "value": "保存失败，请重试"
+    },
+    {
+      "name": "common_save",
+      "value": "保存"
+    },
+    {
+      "name": "totp_invalid",
+      "value": "验证码密钥无效"
+    },
+    {
+      "name": "add_attachment",
+      "value": "添加附件"
+    },
+    {
+      "name": "field_add",
+      "value": "添加字段"
+    },
+    {
+      "name": "item_type_locked",
+      "value": "条目类型创建后不可更改"
+    },
+    {
+      "name": "trash_empty",
+      "value": "回收站为空"
+    },
+    {
+      "name": "restore",
+      "value": "恢复"
+    },
+    {
+      "name": "delete_forever",
+      "value": "永久删除"
+    },
+    {
+      "name": "delete_forever_confirm",
+      "value": "永久删除后无法恢复，确定继续？"
+    },
+    {
+      "name": "a11y_copy",
+      "value": "复制"
+    },
+    {
+      "name": "a11y_copy_username",
+      "value": "复制用户名"
+    },
+    {
+      "name": "a11y_copy_password",
+      "value": "复制密码"
+    },
+    {
+      "name": "a11y_copy_code",
+      "value": "复制验证码"
+    },
+    {
+      "name": "a11y_show_password",
+      "value": "显示密码"
+    },
+    {
+      "name": "a11y_hide_password",
+      "value": "隐藏密码"
+    },
+    {
+      "name": "a11y_refresh",
+      "value": "重新生成"
+    },
+    {
+      "name": "a11y_download",
+      "value": "下载附件"
+    },
+    {
+      "name": "a11y_favorite",
+      "value": "收藏"
+    },
+    {
+      "name": "sync_failed",
+      "value": "同步失败，请检查网络后重试"
+    },
+    {
+      "name": "login_label_email",
+      "value": "邮箱"
+    },
+    {
+      "name": "login_label_password",
+      "value": "密码"
+    },
+    {
+      "name": "login_label_server",
+      "value": "服务器地址"
+    },
+    {
+      "name": "login_register_hint",
+      "value": "没有账号?前往Bitwarden官网注册"
+    },
+    {
+      "name": "settings_experimental",
+      "value": "试验性内容"
+    },
+    {
+      "name": "settings_glass_effects",
+      "value": "液态玻璃效果"
+    },
+    {
+      "name": "settings_glass_tab",
+      "value": "液态玻璃页签"
+    },
+    {
+      "name": "settings_glass_tab_hint",
+      "value": "该功能为试验性内容,使用中可能出现帧率不匹配、延迟、显示问题"
+    },
+    {
+      "name": "settings_glass_toggle",
+      "value": "液态玻璃开关"
+    },
+    {
+      "name": "settings_glass_slider",
+      "value": "液态玻璃滑块"
+    },
+    {
+      "name": "a11y_hint",
+      "value": "查看说明"
+    },
+    {
+      "name": "dialog_type_title",
+      "value": "类型"
+    },
+    {
+      "name": "a11y_add_item",
+      "value": "添加条目"
+    },
+    {
+      "name": "type_login",
+      "value": "登录"
+    },
+    {
+      "name": "type_card",
+      "value": "银行卡"
+    },
+    {
+      "name": "type_identity",
+      "value": "身份"
+    },
+    {
+      "name": "type_note",
+      "value": "安全笔记"
+    },
+    {
+      "name": "onboarding_demo_mode_cta",
+      "value": "仅体验 UI (演示模式)"
+    },
+    {
+      "name": "demo_banner_title",
+      "value": "UI 体验模式"
+    },
+    {
+      "name": "demo_exit_btn",
+      "value": "退出"
+    },
+    {
+      "name": "demo_exit_title",
+      "value": "退出 UI 体验模式"
+    },
+    {
+      "name": "demo_exit_confirm_body",
+      "value": "退出后将清空所有体验数据（含新增/编辑条目）并返回向导。是否确认？"
+    },
+    {
+      "name": "settings_sponsor_title",
+      "value": "支持作者"
+    },
+    {
+      "name": "settings_sponsor_desc",
+      "value": "请喝咖啡 ☕"
+    },
+    {
+      "name": "sponsor_dialog_title",
+      "value": "支持 HallPass 开发"
+    },
+    {
+      "name": "sponsor_dialog_subtitle",
+      "value": "感谢您的支持，有任何问题请联系作者。"
+    },
+    {
+      "name": "sponsor_loading",
+      "value": "正在获取赞助档位..."
+    },
+    {
+      "name": "sponsor_unsupported_region",
+      "value": "当前华为账号服务地暂不支持内购"
+    },
+    {
+      "name": "sponsor_success_title",
+      "value": "非常感谢您的赞助！"
+    },
+    {
+      "name": "sponsor_success_desc",
+      "value": "您的支持是 HallPass 持续完善的动力。"
+    },
+    {
+      "name": "sponsor_confirm_btn",
+      "value": "完成"
+    },
+    {
+      "name": "sponsor_tier_1_title",
+      "value": "喝口咖啡"
+    },
+    {
+      "name": "sponsor_tier_1_desc",
+      "value": "请作者喝口咖啡"
+    },
+    {
+      "name": "sponsor_tier_7_title",
+      "value": "喝杯咖啡"
+    },
+    {
+      "name": "sponsor_tier_7_desc",
+      "value": "请作者喝杯咖啡"
+    },
+    {
+      "name": "sponsor_tier_17_title",
+      "value": "原价咖啡"
+    },
+    {
+      "name": "sponsor_tier_17_desc",
+      "value": "请作者喝原价咖啡"
+    },
+    {
+      "name": "sponsor_legal_hint",
+      "value": "赞助款项为自愿无偿赠予，由华为应用内支付(IAP)结算。"
+    },
+    {
+      "name": "sponsor_err_not_authorized",
+      "value": "华为支付服务暂未开通或未授权"
+    },
+    {
+      "name": "sponsor_err_account_not_logged_in",
+      "value": "请先在系统设置中登录华为账号"
+    },
+    {
+      "name": "sponsor_err_network",
+      "value": "网络连接异常，请检查网络设置"
+    },
+    {
+      "name": "sponsor_err_frequent",
+      "value": "操作过于频繁，请稍后再试"
+    },
+    {
+      "name": "sponsor_err_user_not_allowed",
+      "value": "当前华为账号受限，无法进行支付交易"
+    },
+    {
+      "name": "sponsor_err_payload_invalid",
+      "value": "订单凭据校验异常，请稍后重新进入面板自动恢复"
+    },
+    {
+      "name": "sponsor_err_product_invalid",
+      "value": "商品信息获取失败，请稍后重试"
+    },
+    {
+      "name": "sponsor_err_general",
+      "value": "支付服务异常，请稍后重试"
+    },
+    {
+      "name": "sponsor_btn_purchasing",
+      "value": "正在调起支付..."
+    },
+    {
+      "name": "sponsor_btn_delivering",
+      "value": "正在确认发货..."
+    },
+    {
+      "name": "sponsor_btn_action",
+      "value": "赞助 %s"
+    }
+  ]
+}

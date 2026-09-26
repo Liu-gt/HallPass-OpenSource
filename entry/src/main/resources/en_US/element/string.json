@@ -1,0 +1,1104 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "HallPass"
+    },
+    {
+      "name": "tab_vault",
+      "value": "Vault"
+    },
+    {
+      "name": "tab_generator",
+      "value": "Generator"
+    },
+    {
+      "name": "tab_settings",
+      "value": "Settings"
+    },
+    {
+      "name": "vault_title",
+      "value": "Vault"
+    },
+    {
+      "name": "search_hint",
+      "value": "Search passwords, notes…"
+    },
+    {
+      "name": "filter_all",
+      "value": "All"
+    },
+    {
+      "name": "filter_favorites",
+      "value": "Favorites"
+    },
+    {
+      "name": "filter_login",
+      "value": "Logins"
+    },
+    {
+      "name": "filter_note",
+      "value": "Notes"
+    },
+    {
+      "name": "filter_card",
+      "value": "Cards"
+    },
+    {
+      "name": "filter_identity",
+      "value": "Identities"
+    },
+    {
+      "name": "filter_folder",
+      "value": "Folder"
+    },
+    {
+      "name": "folder_all",
+      "value": "All Folders"
+    },
+    {
+      "name": "folder_none",
+      "value": "No Folder"
+    },
+    {
+      "name": "swipe_copy_password",
+      "value": "Copy Password"
+    },
+    {
+      "name": "swipe_copy_username",
+      "value": "Copy Username"
+    },
+    {
+      "name": "swipe_favorite",
+      "value": "Favorite"
+    },
+    {
+      "name": "menu_edit",
+      "value": "Edit"
+    },
+    {
+      "name": "menu_move",
+      "value": "Move to Folder"
+    },
+    {
+      "name": "menu_copy_totp",
+      "value": "Copy Code"
+    },
+    {
+      "name": "menu_delete",
+      "value": "Delete"
+    },
+    {
+      "name": "toast_copied",
+      "value": "Copied"
+    },
+    {
+      "name": "empty_title",
+      "value": "No Items Yet"
+    },
+    {
+      "name": "empty_hint",
+      "value": "Add your first password"
+    },
+    {
+      "name": "detail_login",
+      "value": "Login"
+    },
+    {
+      "name": "detail_username",
+      "value": "Username"
+    },
+    {
+      "name": "detail_password",
+      "value": "Password"
+    },
+    {
+      "name": "detail_password_strength",
+      "value": "Password strength"
+    },
+    {
+      "name": "detail_totp",
+      "value": "One-Time Code"
+    },
+    {
+      "name": "detail_uri",
+      "value": "Website"
+    },
+    {
+      "name": "detail_note",
+      "value": "Notes"
+    },
+    {
+      "name": "detail_fields",
+      "value": "Custom Fields"
+    },
+    {
+      "name": "detail_attachments",
+      "value": "Attachments"
+    },
+    {
+      "name": "detail_meta",
+      "value": "More"
+    },
+    {
+      "name": "detail_folder",
+      "value": "Folder"
+    },
+    {
+      "name": "detail_updated",
+      "value": "Updated"
+    },
+    {
+      "name": "detail_history",
+      "value": "Password History"
+    },
+    {
+      "name": "detail_card_holder",
+      "value": "Cardholder"
+    },
+    {
+      "name": "detail_card_number",
+      "value": "Card Number"
+    },
+    {
+      "name": "detail_card_brand",
+      "value": "Brand"
+    },
+    {
+      "name": "detail_card_expiry",
+      "value": "Expiry"
+    },
+    {
+      "name": "detail_card_code",
+      "value": "Security Code"
+    },
+    {
+      "name": "detail_card_exp_month",
+      "value": "Expiration Month"
+    },
+    {
+      "name": "detail_card_exp_year",
+      "value": "Expiration Year"
+    },
+    {
+      "name": "detail_id_first_name",
+      "value": "First Name"
+    },
+    {
+      "name": "detail_id_middle_name",
+      "value": "Middle Name"
+    },
+    {
+      "name": "detail_id_last_name",
+      "value": "Last Name"
+    },
+    {
+      "name": "detail_id_company",
+      "value": "Company"
+    },
+    {
+      "name": "detail_id_email",
+      "value": "Email"
+    },
+    {
+      "name": "detail_id_phone",
+      "value": "Phone"
+    },
+    {
+      "name": "detail_id_ssn",
+      "value": "SSN"
+    },
+    {
+      "name": "detail_id_passport",
+      "value": "Passport Number"
+    },
+    {
+      "name": "detail_id_license",
+      "value": "License Number"
+    },
+    {
+      "name": "detail_id_address",
+      "value": "Address"
+    },
+    {
+      "name": "detail_id_city",
+      "value": "City"
+    },
+    {
+      "name": "detail_id_state",
+      "value": "State"
+    },
+    {
+      "name": "detail_id_postal",
+      "value": "Postal Code"
+    },
+    {
+      "name": "detail_id_country",
+      "value": "Country"
+    },
+    {
+      "name": "edit",
+      "value": "Edit"
+    },
+    {
+      "name": "favorite",
+      "value": "Favorite"
+    },
+    {
+      "name": "unfavorite",
+      "value": "Unfavorite"
+    },
+    {
+      "name": "field_key",
+      "value": "Name"
+    },
+    {
+      "name": "item_info",
+      "value": "Info"
+    },
+    {
+      "name": "item_name",
+      "value": "Item Name"
+    },
+    {
+      "name": "item_group",
+      "value": "Group"
+    },
+    {
+      "name": "field_value",
+      "value": "Value"
+    },
+    {
+      "name": "field_type_text",
+      "value": "Text"
+    },
+    {
+      "name": "field_type_hidden",
+      "value": "Hidden"
+    },
+    {
+      "name": "field_type_boolean",
+      "value": "Boolean"
+    },
+    {
+      "name": "field_type_linked",
+      "value": "Linked"
+    },
+    {
+      "name": "item_name_required",
+      "value": "Item Name is required"
+    },
+    {
+      "name": "field_name_required",
+      "value": "Field Name is required"
+    },
+    {
+      "name": "required_fields_missing",
+      "value": "Fill in the required fields"
+    },
+    {
+      "name": "gen_title",
+      "value": "Generator"
+    },
+    {
+      "name": "gen_type",
+      "value": "Type"
+    },
+    {
+      "name": "gen_password",
+      "value": "Password"
+    },
+    {
+      "name": "gen_passphrase",
+      "value": "Passphrase"
+    },
+    {
+      "name": "gen_length",
+      "value": "Length"
+    },
+    {
+      "name": "gen_upper",
+      "value": "A–Z"
+    },
+    {
+      "name": "gen_lower",
+      "value": "a–z"
+    },
+    {
+      "name": "gen_digits",
+      "value": "0–9"
+    },
+    {
+      "name": "gen_symbols",
+      "value": "!@#$"
+    },
+    {
+      "name": "gen_result",
+      "value": "Result"
+    },
+    {
+      "name": "gen_refresh",
+      "value": "Regenerate"
+    },
+    {
+      "name": "gen_copy",
+      "value": "Copy"
+    },
+    {
+      "name": "settings_account",
+      "value": "Account"
+    },
+    {
+      "name": "settings_account_email",
+      "value": "Signed-in Account"
+    },
+    {
+      "name": "settings_server",
+      "value": "Server"
+    },
+    {
+      "name": "settings_signout",
+      "value": "Sign Out"
+    },
+    {
+      "name": "settings_security",
+      "value": "Security"
+    },
+    {
+      "name": "settings_autolock",
+      "value": "Auto-lock"
+    },
+    {
+      "name": "autolock_1min",
+      "value": "After 1 minute"
+    },
+    {
+      "name": "autolock_5min",
+      "value": "After 5 minutes"
+    },
+    {
+      "name": "autolock_never",
+      "value": "Never"
+    },
+    {
+      "name": "settings_biometric_fingerprint",
+      "value": "Fingerprint Unlock"
+    },
+    {
+      "name": "settings_biometric_face",
+      "value": "Face Unlock"
+    },
+    {
+      "name": "settings_biometric_preferred",
+      "value": "Preferred Method"
+    },
+    {
+      "name": "biometric_preferred_fingerprint",
+      "value": "Fingerprint"
+    },
+    {
+      "name": "biometric_preferred_face",
+      "value": "Face"
+    },
+    {
+      "name": "fast_unlock_verify_failed",
+      "value": "Biometric verification failed. Retry or enable later in Settings"
+    },
+    {
+      "name": "settings_entry_lock",
+      "value": "Verify Identity on Entry"
+    },
+    {
+      "name": "settings_clipboard",
+      "value": "Clipboard Auto-clear"
+    },
+    {
+      "name": "settings_clipboard_hint",
+      "value": "Auto-clear after 30 seconds; applies only to the system clipboard and cannot clear data stored in input method history"
+    },
+    {
+      "name": "settings_screenshot",
+      "value": "Block Screenshots"
+    },
+    {
+      "name": "settings_screenshot_hint",
+      "value": "Prevent system screenshots"
+    },
+    {
+      "name": "settings_appearance",
+      "value": "Appearance"
+    },
+    {
+      "name": "settings_theme",
+      "value": "Theme"
+    },
+    {
+      "name": "theme_default",
+      "value": "Green"
+    },
+    {
+      "name": "theme_waterlily",
+      "value": "Teal"
+    },
+    {
+      "name": "theme_cathedral",
+      "value": "Violet"
+    },
+    {
+      "name": "theme_rose",
+      "value": "Rose"
+    },
+    {
+      "name": "theme_haystack",
+      "value": "Amber"
+    },
+    {
+      "name": "settings_mode",
+      "value": "Appearance Mode"
+    },
+    {
+      "name": "mode_system",
+      "value": "System"
+    },
+    {
+      "name": "mode_light",
+      "value": "Light"
+    },
+    {
+      "name": "mode_dark",
+      "value": "Dark"
+    },
+    {
+      "name": "settings_general",
+      "value": "General"
+    },
+    {
+      "name": "settings_sort",
+      "value": "Sort By"
+    },
+    {
+      "name": "sort_name",
+      "value": "By Name"
+    },
+    {
+      "name": "sort_recent",
+      "value": "Recently Used"
+    },
+    {
+      "name": "settings_about",
+      "value": "About"
+    },
+    {
+      "name": "settings_version",
+      "value": "Version"
+    },
+    {
+      "name": "settings_license",
+      "value": "License"
+    },
+    {
+      "name": "settings_repo",
+      "value": "Source Code"
+    },
+    {
+      "name": "settings_contact",
+      "value": "Contact Author"
+    },
+    {
+      "name": "settings_license_value",
+      "value": "GPL-3.0 or later"
+    },
+    {
+      "name": "settings_copyright",
+      "value": "Copyright"
+    },
+    {
+      "name": "gen_charset",
+      "value": "Character Set"
+    },
+    {
+      "name": "gallery_title",
+      "value": "Style Baseline"
+    },
+    {
+      "name": "gallery_brand",
+      "value": "Brand Colors"
+    },
+    {
+      "name": "gallery_neutral",
+      "value": "Neutral Colors"
+    },
+    {
+      "name": "gallery_typography",
+      "value": "Typography Scale"
+    },
+    {
+      "name": "gallery_components",
+      "value": "Components"
+    },
+    {
+      "name": "gallery_button",
+      "value": "Button"
+    },
+    {
+      "name": "gallery_card",
+      "value": "Card"
+    },
+    {
+      "name": "gallery_row",
+      "value": "List Row"
+    },
+    {
+      "name": "gallery_input",
+      "value": "Input"
+    },
+    {
+      "name": "gallery_input_hint",
+      "value": "Enter content"
+    },
+    {
+      "name": "welcome_title",
+      "value": "Welcome"
+    },
+    {
+      "name": "server_title",
+      "value": "Choose Server"
+    },
+    {
+      "name": "login_title",
+      "value": "Sign In"
+    },
+    {
+      "name": "twofactor_title",
+      "value": "Two-Factor Authentication"
+    },
+    {
+      "name": "unlock_title",
+      "value": "Unlock"
+    },
+    {
+      "name": "item_detail_title",
+      "value": "Item Details"
+    },
+    {
+      "name": "item_edit_title",
+      "value": "Edit Item"
+    },
+    {
+      "name": "trash_title",
+      "value": "Trash"
+    },
+    {
+      "name": "placeholder_body",
+      "value": "Placeholder content — coming soon"
+    },
+    {
+      "name": "placeholder_next",
+      "value": "Next"
+    },
+    {
+      "name": "placeholder_open_detail",
+      "value": "Open Item Details"
+    },
+    {
+      "name": "welcome_body",
+      "value": "HallPass is an end-to-end encrypted password manager. Your data is encrypted on this device before it syncs — no one else can read it, not even us."
+    },
+    {
+      "name": "welcome_cta",
+      "value": "Get started"
+    },
+    {
+      "name": "server_official",
+      "value": "Official cloud (bitwarden.com)"
+    },
+    {
+      "name": "server_selfhosted",
+      "value": "Third-party server"
+    },
+    {
+      "name": "server_url_hint",
+      "value": "e.g. vaultwarden.example.com"
+    },
+    {
+      "name": "server_url_invalid",
+      "value": "Invalid server address"
+    },
+    {
+      "name": "continue",
+      "value": "Continue"
+    },
+    {
+      "name": "previous_step",
+      "value": "Back"
+    },
+    {
+      "name": "server_desc",
+      "value": "Choose where your data lives. You can review it later in Settings."
+    },
+    {
+      "name": "login_email_hint",
+      "value": "Email address"
+    },
+    {
+      "name": "login_password_hint",
+      "value": "Master password"
+    },
+    {
+      "name": "login_cta",
+      "value": "Log in"
+    },
+    {
+      "name": "login_error_credentials",
+      "value": "Incorrect master password or code"
+    },
+    {
+      "name": "login_error_network",
+      "value": "Network error, please retry"
+    },
+    {
+      "name": "login_error_server",
+      "value": "Server error, please try again later"
+    },
+    {
+      "name": "login_busy",
+      "value": "Logging in…"
+    },
+    {
+      "name": "login_kdf_slow",
+      "value": "Large KDF settings: derivation may take a few seconds."
+    },
+    {
+      "name": "twofactor_hint",
+      "value": "Enter your two-step verification code to continue"
+    },
+    {
+      "name": "twofactor_totp",
+      "value": "Authenticator"
+    },
+    {
+      "name": "twofactor_email",
+      "value": "Email code"
+    },
+    {
+      "name": "twofactor_code_hint",
+      "value": "6-8 digit code"
+    },
+    {
+      "name": "twofactor_send_email",
+      "value": "Send code"
+    },
+    {
+      "name": "twofactor_other",
+      "value": "This account uses an unsupported two-step method. Finish it in another client, then retry."
+    },
+    {
+      "name": "twofactor_verify",
+      "value": "Verify"
+    },
+    {
+      "name": "twofactor_exhausted",
+      "value": "Too many attempts. Returned to login."
+    },
+    {
+      "name": "fast_unlock_title",
+      "value": "Enable fast unlock?"
+    },
+    {
+      "name": "fast_unlock_body",
+      "value": "Use biometrics or your lock screen credential instead of typing the master password. The master password remains the only root credential."
+    },
+    {
+      "name": "fast_unlock_enable",
+      "value": "Enable"
+    },
+    {
+      "name": "fast_unlock_later",
+      "value": "Later"
+    },
+    {
+      "name": "fast_unlock_failed",
+      "value": "Could not enable fast unlock. Try again later in Settings."
+    },
+    {
+      "name": "twofactor_remember",
+      "value": "Remember this device for 30 days"
+    },
+    {
+      "name": "newdevice_title",
+      "value": "New device verification"
+    },
+    {
+      "name": "newdevice_hint",
+      "value": "First sign-in on this device: we emailed you a verification code. Enter it to continue."
+    },
+    {
+      "name": "newdevice_code_hint",
+      "value": "Email verification code"
+    },
+    {
+      "name": "newdevice_verify",
+      "value": "Verify"
+    },
+    {
+      "name": "newdevice_invalid",
+      "value": "Invalid or expired code. Try again, or go back and sign in again to get a new code."
+    },
+    {
+      "name": "unlock_biometric",
+      "value": "Unlock with biometrics"
+    },
+    {
+      "name": "unlock_master_entry",
+      "value": "Use master password"
+    },
+    {
+      "name": "unlock_password_hint",
+      "value": "Master password"
+    },
+    {
+      "name": "unlock_cta",
+      "value": "Unlock"
+    },
+    {
+      "name": "unlock_biometric_fallback",
+      "value": "Biometrics unavailable. Use your master password."
+    },
+    {
+      "name": "unlock_biometric_locked",
+      "value": "Too many failed attempts. Fast unlock is disabled."
+    },
+    {
+      "name": "delete_confirm_body",
+      "value": "The item will move to the trash. You can restore it anytime."
+    },
+    {
+      "name": "cancel",
+      "value": "Cancel"
+    },
+    {
+      "name": "detail_download_saved",
+      "value": "Saved to the chosen folder"
+    },
+    {
+      "name": "item_new_title",
+      "value": "New item"
+    },
+    {
+      "name": "item_new_login",
+      "value": "New Login"
+    },
+    {
+      "name": "item_new_note",
+      "value": "New Secure Note"
+    },
+    {
+      "name": "item_new_card",
+      "value": "New Card"
+    },
+    {
+      "name": "item_new_identity",
+      "value": "New Identity"
+    },
+    {
+      "name": "save_queued",
+      "value": "Saved offline. Will sync when online"
+    },
+    {
+      "name": "save_failed",
+      "value": "Save failed, please retry"
+    },
+    {
+      "name": "common_save",
+      "value": "Save"
+    },
+    {
+      "name": "totp_invalid",
+      "value": "Invalid one-time password secret"
+    },
+    {
+      "name": "add_attachment",
+      "value": "Add attachment"
+    },
+    {
+      "name": "field_add",
+      "value": "Add field"
+    },
+    {
+      "name": "item_type_locked",
+      "value": "Item type cannot change after creation"
+    },
+    {
+      "name": "trash_empty",
+      "value": "Trash is empty"
+    },
+    {
+      "name": "restore",
+      "value": "Restore"
+    },
+    {
+      "name": "delete_forever",
+      "value": "Delete forever"
+    },
+    {
+      "name": "delete_forever_confirm",
+      "value": "This cannot be undone. Delete forever?"
+    },
+    {
+      "name": "a11y_copy",
+      "value": "Copy"
+    },
+    {
+      "name": "a11y_copy_code",
+      "value": "Copy verification code"
+    },
+    {
+      "name": "a11y_copy_password",
+      "value": "Copy password"
+    },
+    {
+      "name": "a11y_copy_username",
+      "value": "Copy username"
+    },
+    {
+      "name": "a11y_download",
+      "value": "Download attachment"
+    },
+    {
+      "name": "a11y_favorite",
+      "value": "Favorite"
+    },
+    {
+      "name": "a11y_hide_password",
+      "value": "Hide password"
+    },
+    {
+      "name": "a11y_refresh",
+      "value": "Regenerate"
+    },
+    {
+      "name": "a11y_show_password",
+      "value": "Show password"
+    },
+    {
+      "name": "autolock_1hour",
+      "value": "After 1 hour"
+    },
+    {
+      "name": "settings_lock_now",
+      "value": "Lock Now"
+    },
+    {
+      "name": "settings_signout_confirm",
+      "value": "Signing out will clear the vault cache and quick-unlock keys on this device. Continue?"
+    },
+    {
+      "name": "sync_failed",
+      "value": "Sync failed. Check your network and try again"
+    },
+    {
+      "name": "login_label_email",
+      "value": "Email"
+    },
+    {
+      "name": "login_label_password",
+      "value": "Password"
+    },
+    {
+      "name": "login_label_server",
+      "value": "Server address"
+    },
+    {
+      "name": "login_register_hint",
+      "value": "Don't have an account? Register on Bitwarden"
+    },
+    {
+      "name": "settings_experimental",
+      "value": "Experimental"
+    },
+    {
+      "name": "settings_glass_effects",
+      "value": "Liquid glass effects"
+    },
+    {
+      "name": "settings_glass_tab",
+      "value": "Liquid glass tab bar"
+    },
+    {
+      "name": "settings_glass_tab_hint",
+      "value": "Experimental feature. Frame rate mismatch, latency or display glitches may occur."
+    },
+    {
+      "name": "settings_glass_toggle",
+      "value": "Liquid glass toggle"
+    },
+    {
+      "name": "settings_glass_slider",
+      "value": "Liquid glass slider"
+    },
+    {
+      "name": "a11y_hint",
+      "value": "View details"
+    },
+    {
+      "name": "dialog_type_title",
+      "value": "Type"
+    },
+    {
+      "name": "a11y_add_item",
+      "value": "Add item"
+    },
+    {
+      "name": "type_login",
+      "value": "Login"
+    },
+    {
+      "name": "type_card",
+      "value": "Card"
+    },
+    {
+      "name": "type_identity",
+      "value": "Identity"
+    },
+    {
+      "name": "type_note",
+      "value": "Secure Note"
+    },
+    {
+      "name": "onboarding_demo_mode_cta",
+      "value": "UI Experience Mode"
+    },
+    {
+      "name": "demo_banner_title",
+      "value": "UI Experience Mode"
+    },
+    {
+      "name": "demo_exit_btn",
+      "value": "Exit"
+    },
+    {
+      "name": "demo_exit_title",
+      "value": "Exit UI Experience Mode"
+    },
+    {
+      "name": "demo_exit_confirm_body",
+      "value": "All demo data (including added/edited items) will be cleared and return to onboarding. Confirm to exit?"
+    },
+    {
+      "name": "settings_sponsor_title",
+      "value": "Support Author"
+    },
+    {
+      "name": "settings_sponsor_desc",
+      "value": "Buy a Coffee ☕"
+    },
+    {
+      "name": "sponsor_dialog_title",
+      "value": "Support HallPass"
+    },
+    {
+      "name": "sponsor_dialog_subtitle",
+      "value": "Thank you for your support! Please contact the author if you have any questions."
+    },
+    {
+      "name": "sponsor_loading",
+      "value": "Loading sponsor tiers..."
+    },
+    {
+      "name": "sponsor_unsupported_region",
+      "value": "In-app purchases are not supported in your current region"
+    },
+    {
+      "name": "sponsor_success_title",
+      "value": "Thank You for Your Support!"
+    },
+    {
+      "name": "sponsor_success_desc",
+      "value": "Your generosity keeps HallPass continuously improving."
+    },
+    {
+      "name": "sponsor_confirm_btn",
+      "value": "Done"
+    },
+    {
+      "name": "sponsor_tier_1_title",
+      "value": "Sip of Coffee"
+    },
+    {
+      "name": "sponsor_tier_1_desc",
+      "value": "Buy the author a sip of coffee"
+    },
+    {
+      "name": "sponsor_tier_7_title",
+      "value": "Cup of Coffee"
+    },
+    {
+      "name": "sponsor_tier_7_desc",
+      "value": "Buy the author a cup of coffee"
+    },
+    {
+      "name": "sponsor_tier_17_title",
+      "value": "Full-price Coffee"
+    },
+    {
+      "name": "sponsor_tier_17_desc",
+      "value": "Buy the author a full-price coffee"
+    },
+    {
+      "name": "sponsor_legal_hint",
+      "value": "Sponsorship is a voluntary donation, processed via Huawei IAP."
+    },
+    {
+      "name": "sponsor_err_not_authorized",
+      "value": "IAP service is not authorized (please enable in AGC console)"
+    },
+    {
+      "name": "sponsor_err_account_not_logged_in",
+      "value": "Please log in to your HUAWEI ID in System Settings"
+    },
+    {
+      "name": "sponsor_err_network",
+      "value": "Network error. Please check your connection"
+    },
+    {
+      "name": "sponsor_err_frequent",
+      "value": "Too many requests. Please try again later"
+    },
+    {
+      "name": "sponsor_err_user_not_allowed",
+      "value": "This HUAWEI ID is restricted from making purchases"
+    },
+    {
+      "name": "sponsor_err_payload_invalid",
+      "value": "Order validation failed. Reopen the dialog to restore"
+    },
+    {
+      "name": "sponsor_err_product_invalid",
+      "value": "Failed to load product tiers. Please retry later"
+    },
+    {
+      "name": "sponsor_err_general",
+      "value": "Payment service error. Please try again later"
+    },
+    {
+      "name": "sponsor_btn_purchasing",
+      "value": "Launching payment..."
+    },
+    {
+      "name": "sponsor_btn_delivering",
+      "value": "Confirming delivery..."
+    },
+    {
+      "name": "sponsor_btn_action",
+      "value": "Sponsor %s"
+    }
+  ]
+}

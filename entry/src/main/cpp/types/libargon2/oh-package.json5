@@ -1,0 +1,7 @@
+{
+  "name": "libargon2.so",
+  "types": "./index.d.ts",
+  "version": "1.0.0",
+  "description": "Argon2id KDF NAPI bridge (HallPass, plan D6 / ADR-0003)",
+  "license": "GPL-3.0-or-later"
+}

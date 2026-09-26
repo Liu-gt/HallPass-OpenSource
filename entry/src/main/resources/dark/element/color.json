@@ -1,0 +1,108 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#141414"
+    },
+    {
+      "name": "primary",
+      "value": "#8AC18A"
+    },
+    {
+      "name": "on_primary",
+      "value": "#091109"
+    },
+    {
+      "name": "label",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "secondary_label",
+      "value": "#808080"
+    },
+    {
+      "name": "tertiary_label",
+      "value": "#464649"
+    },
+    {
+      "name": "system_background",
+      "value": "#141414"
+    },
+    {
+      "name": "system_background_transparent",
+      "value": "#00141414"
+    },
+    {
+      "name": "secondary_system_background",
+      "value": "#1C1C1E"
+    },
+    {
+      "name": "on_tint",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "avatar_fill",
+      "value": "#8E8E93"
+    },
+    {
+      "name": "search_field",
+      "value": "#1C1C1E"
+    },
+    {
+      "name": "search_field_secondary",
+      "value": "#1C1C1E"
+    },
+    {
+      "name": "detail_background",
+      "value": "#000000"
+    },
+    {
+      "name": "separator",
+      "value": "#464649"
+    },
+    {
+      "name": "tertiary_system_background",
+      "value": "#2C2C2E"
+    },
+    {
+      "name": "scrim",
+      "value": "#66000000"
+    },
+    {
+      "name": "shield_glass_high",
+      "value": "#E6F1F8F1"
+    },
+    {
+      "name": "shield_glass_low",
+      "value": "#4DE5F1E5"
+    },
+    {
+      "name": "danger",
+      "value": "#FF3B30"
+    },
+    {
+      "name": "success",
+      "value": "#34C759"
+    },
+    {
+      "name": "type_badge_login",
+      "value": "#34C759"
+    },
+    {
+      "name": "type_badge_card",
+      "value": "#3478F6"
+    },
+    {
+      "name": "type_badge_identity",
+      "value": "#5E5CE6"
+    },
+    {
+      "name": "type_badge_note",
+      "value": "#FF9500"
+    },
+    {
+      "name": "system_orange",
+      "value": "#FF9F0A"
+    }
+  ]
+}

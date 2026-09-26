@@ -1,0 +1,25 @@
+/node_modules
+/oh_modules
+/local.properties
+/.idea
+**/build
+**/BuildProfile.ets
+/.hvigor
+.cxx
+/.clangd
+/.clang-format
+/.clang-tidy
+**/.test
+/.appanalyzer
+/.cache
+# macOS 目录元数据（此前根目录那个被跟踪了，每次 diff 都是噪声）
+.DS_Store
+# 签名材料：禁止入库
+/signature
+*.p12
+*.cer
+*.p7b
+*.jks
+*.keystore
+*.csr
+/.ohos

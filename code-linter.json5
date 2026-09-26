@@ -1,0 +1,74 @@
+{
+  "files": [
+    "**/*.ets"
+  ],
+  "ignore": [
+    "**/src/ohosTest/**/*",
+    "**/src/test/**/*",
+    "**/src/mock/**/*",
+    "**/node_modules/**/*",
+    "**/oh_modules/**/*",
+    "**/build/**/*",
+    "**/.preview/**/*"
+  ],
+  "ruleSet": [
+    "plugin:@performance/recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "rules": {
+    "@security/no-unsafe-aes": "error",
+    "@security/no-unsafe-hash": "error",
+    "@security/no-unsafe-mac": "warn",
+    "@security/no-unsafe-dh": "error",
+    "@security/no-unsafe-dsa": "error",
+    "@security/no-unsafe-ecdsa": "error",
+    "@security/no-unsafe-rsa-encrypt": "error",
+    "@security/no-unsafe-rsa-sign": "error",
+    "@security/no-unsafe-rsa-key": "error",
+    "@security/no-unsafe-dsa-key": "error",
+    "@security/no-unsafe-dh-key": "error",
+    "@security/no-unsafe-3des": "error",
+    // 铁律：禁新增状态管理 V1 装饰器（plan D9，@Builder 体系保留）；@ComponentV2 体系见各页面
+    "@typescript-eslint/no-restricted-syntax": [
+      "error",
+      {
+        "selector": "Decorator > Identifier[name=/^(State|Prop|Link|Provide|Consume|Watch|ObjectLink|Observed|StorageLink|StorageProp|LocalStorageLink|LocalStorageProp|Reusable|Track)$/]",
+        "message": "禁止新增状态管理 V1 装饰器（plan D9）：改用 V2（@Local/@Param/@Provider/@Consumer/@Monitor/@ObservedV2+@Trace）"
+      },
+      {
+        "selector": "Decorator > CallExpression[callee.name=/^(State|Prop|Link|Provide|Consume|Watch|ObjectLink|Observed|StorageLink|StorageProp|LocalStorageLink|LocalStorageProp|Reusable|Track)$/]",
+        "message": "禁止新增状态管理 V1 装饰器（plan D9）：改用 V2（@Local/@Param/@Provider/@Consumer/@Monitor/@ObservedV2+@Trace）"
+      }
+    ]
+  },
+  // 铁律：features 层禁 import 系统能力（plan D1 铁律 1，UI 之外的系统能力一律经 application 服务）
+  // 注意：overrides 的 rules 覆盖公共配置（数组整体替换），故 V1 装饰器封禁在此重复声明
+  "overrides": [
+    {
+      "files": [
+        "entry/src/main/ets/features/**/*.ets"
+      ],
+      "rules": {
+        "@typescript-eslint/no-restricted-syntax": [
+          "error",
+          {
+            "selector": "ImportDeclaration[source.value=/^@ohos\\./]",
+            "message": "features 禁止 import @ohos.*（plan D1 铁律 1）：系统能力经 application 服务"
+          },
+          {
+            "selector": "ImportDeclaration[source.value=/^@kit\\./]",
+            "message": "features 禁止 import @kit.*（plan D1 铁律 1）：系统能力经 application 服务"
+          },
+          {
+            "selector": "Decorator > Identifier[name=/^(State|Prop|Link|Provide|Consume|Watch|ObjectLink|Observed|StorageLink|StorageProp|LocalStorageLink|LocalStorageProp|Reusable|Track)$/]",
+            "message": "禁止新增状态管理 V1 装饰器（plan D9）：改用 V2（@Local/@Param/@Provider/@Consumer/@Monitor/@ObservedV2+@Trace）"
+          },
+          {
+            "selector": "Decorator > CallExpression[callee.name=/^(State|Prop|Link|Provide|Consume|Watch|ObjectLink|Observed|StorageLink|StorageProp|LocalStorageLink|LocalStorageProp|Reusable|Track)$/]",
+            "message": "禁止新增状态管理 V1 装饰器（plan D9）：改用 V2（@Local/@Param/@Provider/@Consumer/@Monitor/@ObservedV2+@Trace）"
+          }
+        ]
+      }
+    }
+  ]
+}
