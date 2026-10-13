@@ -17,8 +17,9 @@ import { ServiceLocator } from '../../application/ServiceLocator';
 import { GlassBandModel } from '../tabs/GlassBandModel';
 import { AppState } from '../../application/state/AppState';
 import { DemoModeManager } from '../../application/demo/DemoModeManager';
-import { SponsorDialogService } from './sponsor/SponsorDialogService';
-import { common } from '@kit.AbilityKit';
+// 暂时注释掉赞助/支持作者功能
+// import { SponsorDialogService } from './sponsor/SponsorDialogService';
+// import { common } from '@kit.AbilityKit';
 
 /**
  * 设置页（票 22，spec F13/F14）：五组卡片（账号/安全/外观/通用/关于），
@@ -363,6 +364,7 @@ export struct SettingsPage {
     .onClick(() => this.viewModel.setColorMode(mode))
   }
 
+  /*
   @Builder
   sponsorEntryRow() {
     Row({ space: Spacing.md }) {
@@ -397,6 +399,7 @@ export struct SettingsPage {
       SponsorDialogService.get().open(ctx);
     })
   }
+  */
 
   build() {
     Stack() {
@@ -587,8 +590,9 @@ export struct SettingsPage {
                 this.rowDivider()
                 this.row($r('app.string.settings_contact'), this.viewModel.contactEmail(), false, false,
                   (): void => this.copyText(this.viewModel.contactEmail()))
-                this.rowDivider()
-                this.sponsorEntryRow()
+                // 暂时注释掉赞助/支持作者功能
+                // this.rowDivider()
+                // this.sponsorEntryRow()
               }
               .width('100%')
             }

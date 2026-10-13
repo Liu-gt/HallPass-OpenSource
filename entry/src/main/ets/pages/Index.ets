@@ -32,10 +32,11 @@ import { GlassTabShell, GLASS_STRIP_HEIGHT } from '../features/tabs/GlassTabShel
 import { GLASS_TAB_CONTENT, GlassTabContentModel, HDS_TABS_SUPPORTED } from '../features/tabs/GlassTabContent';
 import { SharedMirrorManager } from '../features/tabs/SharedMirrorManager';
 import { ServiceLocator } from '../application/ServiceLocator';
-import { common } from '@kit.AbilityKit';
-import { SponsorDialogHost } from '../common/components/SponsorDialogHost';
-import { SponsorDialogService } from '../features/settings/sponsor/SponsorDialogService';
-import { SponsorService } from '../features/settings/sponsor/SponsorService';
+// 暂时注释掉赞助/支持作者功能相关引用
+// import { common } from '@kit.AbilityKit';
+// import { SponsorDialogHost } from '../common/components/SponsorDialogHost';
+// import { SponsorDialogService } from '../features/settings/sponsor/SponsorDialogService';
+// import { SponsorService } from '../features/settings/sponsor/SponsorService';
 
 /**
  * 全局唯一根页面（plan D1/D2/D9）：AppState 三态根级条件渲染（Onboarding/Unlock 非路由页，
@@ -484,9 +485,9 @@ struct Index {
       })
       // 确认弹窗可见时吞掉返回手势/返回键（视为取消），避免弹窗悬在已弹出的页面上
       .onBackPressed((): boolean => {
-        if (SponsorDialogService.get().handleBack()) {
-          return true;
-        }
+        // if (SponsorDialogService.get().handleBack()) {
+        //   return true;
+        // }
         if (TypeSelectDialogService.get().handleBack()) {
           return true;
         }
@@ -680,7 +681,8 @@ struct Index {
     } catch (_err) {
       // 异常时维持 0，由挂载后的 onAreaChange 动态填充
     }
-    // F-08: 冷启动非阻塞静默补发漏单
+    // F-08: 冷启动非阻塞静默补发漏单（赞助功能暂时注释）
+    /*
     try {
       const hostContext = this.getUIContext().getHostContext() as common.UIAbilityContext;
       if (hostContext) {
@@ -689,13 +691,14 @@ struct Index {
     } catch (_e) {
       // 静默兜底，不干扰主线程启动
     }
+    */
     // 仅初始化空栈；锁定/解锁重建 Navigation 时保留 Home 及其上方页面。
     if (this.navStack.size() === 0) {
       this.navStack.pushPath({ name: 'Home' }, false);
     }
     this.appState.addPhaseListener((phase: AppPhase): void => {
       // 相位迁移（锁定/登出/体验）强制收起根级确认弹窗与赞助弹窗：回调闭包属旧页面，解锁后不可复现
-      SponsorDialogService.get().dismiss();
+      // SponsorDialogService.get().dismiss();
       ConfirmDialogService.get().dismiss();
       TypeSelectDialogService.get().dismiss();
       if (phase === 'onboarding' || phase === 'demo') {
@@ -727,9 +730,9 @@ struct Index {
 
   /** 返回手势/返回键：确认弹窗优先消费，其次向导与解锁前的子流程，未被拦截则交给系统。 */
   onBackPress(): boolean {
-    if (SponsorDialogService.get().handleBack()) {
-      return true;
-    }
+    // if (SponsorDialogService.get().handleBack()) {
+    //   return true;
+    // }
     if (TypeSelectDialogService.get().handleBack()) {
       return true;
     }
@@ -824,8 +827,8 @@ struct Index {
       // 登录后快速解锁开启确认（根级模态：覆盖页签栏与所有页面，选择前阻断交互）
       FastUnlockPrompt()
 
-      // 支持作者赞助弹窗（根级模态宿主：覆盖页签栏与状态栏，选择前阻断交互）
-      SponsorDialogHost()
+      // 支持作者赞助弹窗（根级模态宿主：暂时注释）
+      // SponsorDialogHost()
 
       // 解锁完成盾牌动效（最顶层覆盖：播放期间不拦截交互，播完自卸载）
       if (this.shieldPlaying) {
