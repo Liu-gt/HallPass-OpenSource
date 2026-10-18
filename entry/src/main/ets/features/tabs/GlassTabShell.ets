@@ -27,7 +27,7 @@ import {
   GlassGLUnregisterTabCallback
 } from 'backdrop';
 import { GLASS_TAB_MIRROR, GlassTabContentModel } from './GlassTabContent';
-import { BAND_EXTRA_TOP_VP, BAND_EXTRA_BOTTOM_VP, GlassBandModel } from './GlassBandModel';
+import { BAND_EXTRA_TOP_VP, BAND_EXTRA_BOTTOM_VP, GlassBandModel, setGlassLeadFrames } from './GlassBandModel';
 import { Spacing } from '../../common/design/Tokens';
 import { ThemeService, ThemeState } from '../../application/theme/ThemeService';
 import { GlassTabIcons } from './GlassTabIcons';
@@ -39,6 +39,17 @@ const TAG: string = 'HallPassGlassShell';
 const SURFACE_ID: string = 'glassSurface';
 /** 原生库名（backdrop HAR 的 libbackdrop.so）。 */
 const SURFACE_LIBRARY: string = 'backdrop';
+/**
+ * 玻璃 surface 的类型：SURFACE（RenderService 直接消费）。
+ *
+ * TEXTURE 的帧要等 UI 线程下一帧取走（vsync + ~0.8ms）再随 UI 事务进 RS：比主内容晚 1 帧
+ * （只能靠外推补，外推误差就是"玻璃里的内容在晃"），而且 buffer 取走后 ~40ms 才归还，
+ * 120Hz 下 5 张不够用、RequestBuffer 频繁阻塞。SURFACE 的帧在下一个 vsync 由 RS 直接取走，
+ * 与同一 UI 帧的主内容同一合成帧上屏：对齐不再需要外推（setGlassLeadFrames(0)），
+ * buffer 下一帧即归还。真机对比见 docs/glass-render-perf-report.md。
+ * 切回 TEXTURE 只改这一处（外推帧数随之回到 1）。
+ */
+const GLASS_SURFACE_TYPE: XComponentType = XComponentType.SURFACE;
 
 /** 原生参数编号（见 backdrop/src/main/cpp/glass/glass_params.h 的 pid）。 */
 const PID_BAR_HEIGHT: number = 0;               // 底板高度（dp）
@@ -103,7 +114,7 @@ const HIGHLIGHT_DRAG: number = 0.5;
 const INNER_SHADOW_RADIUS_DRAG: number = 7;
 const INNER_SHADOW_ALPHA_DRAG: number = 0.20;
 const HIGHLIGHT_WIDTH: number = 0.3;
-const PRESS_SAMPLE_SHRINK: number = 0.18;
+const PRESS_SAMPLE_SHRINK: number = 0.1;
 const PRESS_LABEL_SCALE: number = 0.2;
 const PRESSED_SCALE: number = 1.44;
 const PRESSED_SCALE_X: number = 1.26;
@@ -128,7 +139,7 @@ const SURFACE_DARK_B: number = 0.2;
 const LABEL_UNSELECTED_ALPHA_DARK: number = 0.8;
 const INDICATOR_TINT_REST_DARK: number = 0;
 const INDICATOR_TINT_DRAG_DARK: number = 0;
-const INDICATOR_FILL_REST_DARK: number = 1;
+const INDICATOR_FILL_REST_DARK: number = 0.6;
 const INDICATOR_FILL_DRAG_DARK: number = 0;
 /** 未选中页签（文字 + 图标）颜色：浅色纯黑 / 深色纯白（对比度优先，不用灰色）。 */
 const TAB_UNSELECTED_LIGHT: string = '#000000';
@@ -349,6 +360,7 @@ export struct GlassTabShell {
 
   aboutToAppear(): void {
     this.alive = true;
+    setGlassLeadFrames(GLASS_SURFACE_TYPE === XComponentType.SURFACE ? 0 : 1);
 
     try {
       const disp = display.getDefaultDisplaySync();
@@ -678,14 +690,16 @@ export struct GlassTabShell {
 
       XComponent({
         id: SURFACE_ID,
-        // TEXTURE：绘制内容作为纹理进 ArkUI 的 GPU 合成，表层 alpha 才会被尊重
-        //（SURFACE 类型走显示子系统合成，实测透明区域会被压成黑带）。
-        type: XComponentType.TEXTURE,
+        // 类型见 GLASS_SURFACE_TYPE。SURFACE 也逐像素尊重 alpha，前提是下面的透明背景色
+        // （旧版"SURFACE 透明区域被压成黑带"就是缺了它）。
+        type: GLASS_SURFACE_TYPE,
         libraryname: SURFACE_LIBRARY,
         controller: this.controller
       })
         .width('100%')
         .height('100%')
+        // SURFACE 型的 surface 默认铺黑底，组件设了非黑背景色时系统才把 surface 底色改成透明
+        .backgroundColor(Color.Transparent)
     }
     .width('100%')
     .height(this.stripHeight)

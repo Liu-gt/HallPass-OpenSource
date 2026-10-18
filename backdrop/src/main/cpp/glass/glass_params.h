@@ -13,8 +13,8 @@ namespace glass {
  * 遗漏任何一处都会静默踩内存（C++ 不报越界）。ticket 08 就踩过一次
  * （`values_[71]` 写到了相邻成员上）。以后加参数：**先改这里的数字，再补默认值**。
  */
-constexpr int kNumValues = 94;  // number id 0..93
-constexpr int kNumBools = 8;    // bool id 0..7
+constexpr int kNumValues = 140;  // number id 0..139
+constexpr int kNumBools = 16;    // bool id 0..15
 
 /**
  * 玻璃参数表。**编号与取值必须与 `pages/GlassPage.ets` 的
@@ -191,6 +191,56 @@ constexpr int kScaleXDamping = 60;
 constexpr int kScaleXStiffness = 61;
 constexpr int kScaleYDamping = 62;
 constexpr int kScaleYStiffness = 63;
+
+// Dialog · 弹窗材质（94..116）
+constexpr int kDialogDimAlpha = 94;
+constexpr int kDialogCornerRadius = 95;
+constexpr int kDialogG2Factor = 96;
+constexpr int kDialogBlurRadius = 97;
+constexpr int kDialogRefractionHeight = 98;
+constexpr int kDialogRefractionAmount = 99;
+constexpr int kDialogRimClarity = 100;
+constexpr int kDialogBevelAlphaScale = 101;
+constexpr int kDialogVibrancy = 102;
+constexpr int kDialogBrightness = 103;
+constexpr int kDialogContrast = 104;
+constexpr int kDialogSurfaceAlpha = 105;
+constexpr int kDialogSurfaceR = 106;
+constexpr int kDialogSurfaceG = 107;
+constexpr int kDialogSurfaceB = 108;
+constexpr int kDialogHighlight = 109;
+constexpr int kDialogHighlightWidth = 110;
+constexpr int kDialogAmbientIntensity = 111;
+constexpr int kDialogInnerRadius = 112;
+constexpr int kDialogInnerAlpha = 113;
+constexpr int kDialogShadowBlur = 114;
+constexpr int kDialogShadowOffset = 115;
+constexpr int kDialogShadowAlpha = 116;
+
+// Dialog · 内部按钮材质（117..139）
+constexpr int kDialogBtnCornerRadius = 117;
+constexpr int kDialogBtnG2Factor = 118;
+constexpr int kDialogBtnBlurRadius = 119;
+constexpr int kDialogBtnRefractionHeight = 120;
+constexpr int kDialogBtnRefractionAmount = 121;
+constexpr int kDialogBtnRimClarity = 122;
+constexpr int kDialogBtnBevelAlphaScale = 123;
+constexpr int kDialogBtnVibrancy = 124;
+constexpr int kDialogBtnBrightness = 125;
+constexpr int kDialogBtnContrast = 126;
+constexpr int kDialogBtnSurfaceAlpha = 127;
+constexpr int kDialogBtnSurfaceR = 128;
+constexpr int kDialogBtnSurfaceG = 129;
+constexpr int kDialogBtnSurfaceB = 130;
+constexpr int kDialogBtnHighlight = 131;
+constexpr int kDialogBtnHighlightWidth = 132;
+constexpr int kDialogBtnAmbientIntensity = 133;
+constexpr int kDialogBtnInnerRadius = 134;
+constexpr int kDialogBtnInnerAlpha = 135;
+constexpr int kDialogBtnShadowBlur = 136;
+constexpr int kDialogBtnShadowOffset = 137;
+constexpr int kDialogBtnShadowAlpha = 138;
+constexpr int kDialogBtnPressGrow = 139;
 }  // namespace pid
 
 // ---------------------------------------------------------------------------
@@ -206,6 +256,15 @@ constexpr int kSilentProbe = 4;
 constexpr int kAmbient = 5;
 constexpr int kDepthEffect = 6;      // 底座/指示器：折射方向叠径向分量（上游 lens 的 depthEffect）
 constexpr int kPlainHighlight = 7;   // 底座：纯色高光（上游 Highlight.Plain）替代描边环
+// Dialog 开关（8..15）
+constexpr int kDialogDispersion = 8;
+constexpr int kDialogDepthEffect = 9;
+constexpr int kDialogAmbient = 10;
+constexpr int kDialogPlainHighlight = 11;
+constexpr int kDialogBtnDispersion = 12;
+constexpr int kDialogBtnDepthEffect = 13;
+constexpr int kDialogBtnAmbient = 14;
+constexpr int kDialogBtnPlainHighlight = 15;
 }  // namespace bid
 
 }  // namespace glass

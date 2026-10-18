@@ -32,6 +32,10 @@ import { GlassTabShell, GLASS_STRIP_HEIGHT } from '../features/tabs/GlassTabShel
 import { GLASS_TAB_CONTENT, GlassTabContentModel, HDS_TABS_SUPPORTED } from '../features/tabs/GlassTabContent';
 import { SharedMirrorManager } from '../features/tabs/SharedMirrorManager';
 import { ServiceLocator } from '../application/ServiceLocator';
+import { GlassGLSetDarkMode } from 'backdrop';
+import { DialogOrigin } from '../common/components/glass/DialogOrigin';
+import { MirrorRouter } from '../features/mirror/MirrorRouter';
+import { BAND_EXTRA_BOTTOM_VP } from '../features/tabs/GlassBandModel';
 // 暂时注释掉赞助/支持作者功能相关引用
 // import { common } from '@kit.AbilityKit';
 // import { SponsorDialogHost } from '../common/components/SponsorDialogHost';
@@ -657,6 +661,17 @@ struct Index {
   }
 
   aboutToAppear(): void {
+    ThemeService.registerGlassDarkModeHandler(GlassGLSetDarkMode);
+    // 玻璃弹窗的出生点：记录最近一次点击坐标，弹窗从触发处长出 / 缩回
+    DialogOrigin.install(this.getUIContext());
+    // 镜像覆盖判定：玻璃页签（中枢）在跑，且屏幕上是页签根页面或已接入镜像的子页面
+    // （MirrorRouter.top，见 features/mirror）；否则整屏消费者（玻璃弹窗）回退快照
+    SharedMirrorManager.getInstance().setCoverageProbe((): boolean => {
+      if (!this.glassBarActive()) {
+        return false;
+      }
+      return this.navStack.size() <= 1 || MirrorRouter.get().top !== null;
+    });
     // 玻璃条带高（vp）：镜像树导出裁剪用；与 GlassTabShell 的条带壳同值
     this.tabModel.bandHeight = GLASS_STRIP_HEIGHT
     // 修复 CRIT-v2-03：初始化顶部安全区高度
@@ -699,8 +714,8 @@ struct Index {
     this.appState.addPhaseListener((phase: AppPhase): void => {
       // 相位迁移（锁定/登出/体验）强制收起根级确认弹窗与赞助弹窗：回调闭包属旧页面，解锁后不可复现
       // SponsorDialogService.get().dismiss();
-      ConfirmDialogService.get().dismiss();
-      TypeSelectDialogService.get().dismiss();
+      ConfirmDialogService.get().dismiss(false);
+      TypeSelectDialogService.get().dismiss(false);
       if (phase === 'onboarding' || phase === 'demo') {
         // 修复 HIGH-01：重置 ViewModel 缓存
         this.tabModel.resetViewModels();
@@ -775,6 +790,7 @@ struct Index {
   private mainContentStack() {
     Stack({ alignContent: Alignment.Top }) {
       Navigation(this.navStack)
+      .id('mainNavigation')
       .mode(NavigationMode.Stack)
       .hideNavBar(true)
       .hideTitleBar(true)
@@ -842,6 +858,7 @@ struct Index {
     }
     .width('100%')
     .height('100%')
+    .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
   }
 
   build() {
@@ -875,6 +892,12 @@ export struct MirrorHost {
   @Local manager: SharedMirrorManager = SharedMirrorManager.getInstance();
   @BuilderParam MainContent: () => void;
 
+  /** 镜像导出总高（vp）= 条带 + 导出上余量 + 下余量（与 GlassTabMirror 根容器一致）。 */
+  private mirrorExportHeightVp(): number {
+    return (this.tabModel.bandHeight > 0 ? this.tabModel.bandHeight : 1) +
+      this.tabModel.exportExtraTopVp + BAND_EXTRA_BOTTOM_VP;
+  }
+
   private isMirrorActive(): boolean {
     try {
       return ServiceLocator.settings().isGlassEffectsActive();
@@ -887,10 +910,17 @@ export struct MirrorHost {
     Stack() {
       // 只有总开关开启时，才挂载 NodeContainer 镜像导出层；关闭时完全卸载 NodeContainer
       if (this.isMirrorActive()) {
+        // 导出尺寸必须显式给足：不给高度时 Row 被父容器的安全区高度夹住，
+        // 镜像放开到整页（页面盒 + 下余量，高于安全区）时生产端 buffer 会被截短，纹理与几何错位
         Row() {
           NodeContainer(this.manager.controller)
+            .width('100%')
+            .height(this.mirrorExportHeightVp())
             .hitTestBehavior(HitTestMode.None)
         }
+        .width('100%')
+        .height(this.mirrorExportHeightVp())
+        .alignItems(VerticalAlign.Top)
         .hitTestBehavior(HitTestMode.None)
         .padding({ top: this.manager.nudgePadding })
         .onAppear(() => {
@@ -904,6 +934,9 @@ export struct MirrorHost {
 
       this.MainContent()
     }
+    .width('100%')
+    .height('100%')
+    .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
   }
 
   aboutToDisappear() {

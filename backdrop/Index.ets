@@ -21,6 +21,7 @@ export {
   GlassGLUnregisterMenuCallback,
   GlassGLSetScene,
   GlassGLSetDensity,
+  GlassGLSetDarkMode,
   GlassGLSetBackdrop,
   GlassGLSetBackdropShift,
   // HallPass：镜像树偏移 / 主树偏移（纹理锁存补偿在原生侧算，见 GlassBandModel）
@@ -42,5 +43,18 @@ export {
   GlassGLWidgetSetPress,
   GlassGLWidgetSetColors,
   GlassGLWidgetIsRunning,
-  GlassGLWidgetDispose
+  GlassGLWidgetDispose,
+  // HallPass：玻璃对话框（Dialog）
+  GlassGLDialogConfigure,
+  GlassGLDialogSetBackdrop,
+  GlassGLDialogSetPress,
+  GlassGLDialogSetGeometry,
+  GlassGLDialogDispose,
+  GlassGLDialogIsReady,
+  GlassGLDialogSetBackdropRect,
+  GlassGLDialogSetLiveRect,
+  GlassGLDialogSetTransform,
+  GlassGLSetContentExport,
+  GlassGLSharedBackdropReady,
+  DialogGeometryRect
 } from 'libbackdrop.so';

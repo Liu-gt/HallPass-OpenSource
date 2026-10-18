@@ -117,7 +117,7 @@ GlassParams::GlassParams() {
     values_[79] = 1.0f;    // saturation
     values_[80] = 1.0f;    // effectOpacity
     // 追加：按压时指示器内部内容的采样缩小比例（0 = 关，0.1 = 缩到 90%）
-    values_[81] = 0.10f;   // pressSampleShrink
+    values_[81] = 0.0f;    // pressSampleShrink
     // 追加：按压形状横向放大倍率；缺省与 id 51（纵向）同值 → 等比撑大，默认外观不变
     values_[82] = 1.7f;
     // 追加：页签图标尺寸（dp）；缺省 20 = 原 kTabIconSizeDp 常量值
@@ -138,6 +138,56 @@ GlassParams::GlassParams() {
     values_[92] = 40.0f;   // shadowBlurPress
     values_[93] = 0.035f;  // shadowAlphaPress
 
+    // ---- Dialog · 弹窗材质（94..116）：用户真机调参定版值（PARAMS_DUMP 2026-10-16 12:21）----
+    values_[94] = 0.34f;   // dialogDimAlpha
+    values_[95] = 43.0f;   // dialogCornerRadius (dp)
+    values_[96] = 0.45f;   // dialogG2Factor
+    values_[97] = 3.0f;    // dialogBlurRadius (dp)
+    values_[98] = 35.0f;   // dialogRefractionHeight (dp)
+    values_[99] = 63.5f;   // dialogRefractionAmount (dp)
+    values_[100] = 0.0f;   // dialogRimClarity
+    values_[101] = 0.32f;  // dialogBevelAlphaScale
+    values_[102] = 1.35f;  // dialogVibrancy
+    values_[103] = 0.18f;  // dialogBrightness
+    values_[104] = 1.0f;   // dialogContrast
+    values_[105] = 0.17f;  // dialogSurfaceAlpha
+    values_[106] = 0.96f;  // dialogSurfaceR
+    values_[107] = 0.97f;  // dialogSurfaceG
+    values_[108] = 1.00f;  // dialogSurfaceB
+    values_[109] = 0.40f;  // dialogHighlight
+    values_[110] = 0.65f;  // dialogHighlightWidth (dp)
+    values_[111] = 0.48f;  // dialogAmbientIntensity
+    values_[112] = 0.0f;   // dialogInnerRadius (dp)
+    values_[113] = 0.0f;   // dialogInnerAlpha
+    values_[114] = 45.0f;  // dialogShadowBlur (dp)
+    values_[115] = 5.0f;   // dialogShadowOffset (dp)
+    values_[116] = 0.14f;  // dialogShadowAlpha
+
+    // ---- Dialog · 内部按钮材质（117..139）：用户真机调参定版值 ----
+    values_[117] = 25.0f;  // dialogBtnCornerRadius (dp)
+    values_[118] = 0.0f;   // dialogBtnG2Factor
+    values_[119] = 24.0f;  // dialogBtnBlurRadius (dp)
+    values_[120] = 20.5f;  // dialogBtnRefractionHeight (dp)
+    values_[121] = 40.0f;  // dialogBtnRefractionAmount (dp)
+    values_[122] = 0.0f;   // dialogBtnRimClarity
+    values_[123] = 0.68f;  // dialogBtnBevelAlphaScale
+    values_[124] = 1.40f;  // dialogBtnVibrancy
+    values_[125] = -0.03f; // dialogBtnBrightness
+    values_[126] = 1.0f;   // dialogBtnContrast
+    values_[127] = 0.25f;  // dialogBtnSurfaceAlpha
+    values_[128] = 1.00f;  // dialogBtnSurfaceR
+    values_[129] = 1.00f;  // dialogBtnSurfaceG
+    values_[130] = 1.00f;  // dialogBtnSurfaceB
+    values_[131] = 0.22f;  // dialogBtnHighlight
+    values_[132] = 0.45f;  // dialogBtnHighlightWidth (dp)
+    values_[133] = 0.32f;  // dialogBtnAmbientIntensity
+    values_[134] = 0.0f;   // dialogBtnInnerRadius (dp)
+    values_[135] = 0.0f;   // dialogBtnInnerAlpha
+    values_[136] = 19.0f;  // dialogBtnShadowBlur (dp)
+    values_[137] = 3.0f;   // dialogBtnShadowOffset (dp)
+    values_[138] = 0.050f; // dialogBtnShadowAlpha
+    values_[139] = 5.0f;   // dialogBtnPressGrow (dp)：按到底时高度 +5dp（50dp 按钮放大 10%；含按下过冲，两钮间距 12vp、单钮面板内边距 18vp 内都放得下）
+
     // ---- 开关 ----
     bools_[0] = false;  // 底座色散（用户定版：默认关）
     bools_[1] = true;   // 底座提饱和
@@ -147,6 +197,14 @@ GlassParams::GlassParams() {
     bools_[5] = false;  // 环境光（上游 spike 未启用，默认关）
     bools_[6] = false;  // 深度效应（上游页签页未启用，默认关）
     bools_[7] = false;  // 纯色高光（上游默认是描边环，默认关）
+    bools_[8] = false;  // Dialog 弹窗色散（用户真机调参定版值）
+    bools_[9] = false;  // Dialog 弹窗深度效应
+    bools_[10] = true;  // Dialog 弹窗环境光
+    bools_[11] = false; // Dialog 弹窗纯色高光
+    bools_[12] = false; // Dialog 按钮色散（用户真机调参定版值）
+    bools_[13] = true;  // Dialog 按钮深度效应
+    bools_[14] = true;  // Dialog 按钮环境光
+    bools_[15] = false; // Dialog 按钮纯色高光
 }
 
 void GlassParams::SetNumber(int id, float value) {

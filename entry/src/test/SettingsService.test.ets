@@ -127,16 +127,19 @@ export default function settingsServiceTest() {
       expect(service.isGlassTabBarActive()).assertFalse();
       expect(service.isGlassToggleActive()).assertFalse();
       expect(service.isGlassSliderActive()).assertFalse();
+      expect(service.isGlassDialogActive()).assertFalse();
 
       // 开启总开关与各子开关
       service.setGlassEffects(true);
       service.setGlassTabBar(true);
       service.setGlassToggle(true);
       service.setGlassSlider(true);
+      service.setGlassDialog(true);
       expect(service.isGlassEffectsActive()).assertTrue();
       expect(service.isGlassTabBarActive()).assertTrue();
       expect(service.isGlassToggleActive()).assertTrue();
       expect(service.isGlassSliderActive()).assertTrue();
+      expect(service.isGlassDialogActive()).assertTrue();
 
       // 关闭总开关：所有子开关生效判定均应为 false
       service.setGlassEffects(false);
@@ -144,6 +147,16 @@ export default function settingsServiceTest() {
       expect(service.isGlassTabBarActive()).assertFalse();
       expect(service.isGlassToggleActive()).assertFalse();
       expect(service.isGlassSliderActive()).assertFalse();
+      expect(service.isGlassDialogActive()).assertFalse();
+    });
+
+    it('glass_dialog_persists_across_cold_restart', 0, async () => {
+      const prefs: FakePrefs = new FakePrefs();
+      const service: SettingsService = new SettingsService(prefs);
+      service.setGlassDialog(true);
+      const restarted: SettingsService = new SettingsService(prefs);
+      await restarted.load();
+      expect(restarted.state.glassDialog).assertTrue();
     });
 
     it('setGlassEffects_does_not_mutate_glassTabBarEpoch', 0, async () => {

@@ -11,6 +11,7 @@ import { VaultViewModel } from '../vault/VaultViewModel';
 import { SettingsViewModel } from '../settings/SettingsViewModel';
 import { GeneratorViewModel } from '../generator/GeneratorViewModel';
 import { GlassBandModel, BAND_EXTRA_TOP_VP, BAND_EXTRA_BOTTOM_VP } from './GlassBandModel';
+import { MirrorRouter, MirrorPageEntry } from '../mirror/MirrorRouter';
 
 /**
  * HdsTabs 沉浸光感能力检测（plan D8/R4）：kit 系统能力缺失时降级普通 Tabs
@@ -35,6 +36,13 @@ export class GlassTabContentModel {
   @Trace curIndex: number = 0;
   /** 玻璃条带高（vp，Index 取 GlassTabShell 的条带常量）：镜像树的导出裁剪高度。 */
   @Trace bandHeight: number = 0;
+  /**
+   * 镜像导出的上沿余量（vp）：平时 = 条带余量（只导出条带）；有整屏消费者（玻璃弹窗等）时
+   * 由 SharedMirrorManager 放开到"整页高 − 条带高"，纹理覆盖整页（见 acquireFullscreen）。
+   */
+  @Trace exportExtraTopVp: number = BAND_EXTRA_TOP_VP;
+  /** 镜像根容器布局完成（导出高度，vp）：SharedMirrorManager 据此下发原生导出余量。 */
+  exportLayoutListener: ((heightVp: number) => void) | null = null;
   /** 滚动同步（主树上报绝对偏移 → 镜像树 scrollTo；首帧催帧见 GlassBandModel.nudge）。 */
   readonly band: GlassBandModel = new GlassBandModel();
 
@@ -189,25 +197,48 @@ export struct GlassTabContent {
 export struct GlassTabMirror {
   @Require @Param model: GlassTabContentModel;
   @Provider('isMirrorContext') readonly isMirror: boolean = true;
+  /** 栈顶已接入镜像的子页面（null = 页签根页面）：镜像内容 / 布局 / 偏移都按它。 */
+  private router: MirrorRouter = MirrorRouter.get();
+
+  /** 镜像里当前那一页的滚动同步模型。 */
+  private activeBand(): GlassBandModel {
+    return this.router.top !== null ? this.router.top.band : this.model.band;
+  }
+
+  @Builder
+  private topPage(entry: MirrorPageEntry) {
+    entry.builder.builder(entry)
+  }
 
   build() {
     Stack({ alignContent: Alignment.Top }) {
       Stack() {
+        // 页签内容常驻（压栈期间隐藏，不卸载：出栈回来不必重建、滚动位置不丢）
         GlassTabContent({ model: this.model, passive: true })
+          .visibility(this.router.top === null ? Visibility.Visible : Visibility.Hidden)
+        if (this.router.top !== null) {
+          this.topPage(this.router.top as MirrorPageEntry)
+        }
       }
       .width('100%')
-      .height(this.model.band.viewportHeight > 0 ? this.model.band.viewportHeight : 1)
+      .height(this.activeBand().viewportHeight > 0 ? this.activeBand().viewportHeight : 1)
       // 越界回弹（Scroll 到不了的部分）用整体平移补齐；滞后的小位移由 GL 采样位移补
       // （见 GlassBandModel.updateSplit），保证玻璃与真实内容同帧。
       .offset({
-        y: -(this.model.band.viewportHeight - this.model.bandHeight - BAND_EXTRA_TOP_VP) -
-          this.model.band.translateY
+        y: -(this.activeBand().viewportHeight - this.model.bandHeight - this.model.exportExtraTopVp) -
+          this.activeBand().translateY
       })
     }
     .width('100%')
     .height((this.model.bandHeight > 0 ? this.model.bandHeight : 1) +
-      BAND_EXTRA_TOP_VP + BAND_EXTRA_BOTTOM_VP)
+      this.model.exportExtraTopVp + BAND_EXTRA_BOTTOM_VP)
     .clip(true)
+    // 导出高度真正布局完才告诉原生（外纹理随后按新尺寸出帧）：放开 / 收回整屏的过渡帧不错位
+    .onAreaChange((_old: Area, area: Area) => {
+      if (this.model.exportLayoutListener !== null) {
+        this.model.exportLayoutListener(Number(area.height));
+      }
+    })
     .backgroundColor($r('app.color.system_background'))
     .hitTestBehavior(HitTestMode.None)
     .accessibilityLevel('no')

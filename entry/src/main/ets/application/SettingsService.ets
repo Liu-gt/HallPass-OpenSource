@@ -35,6 +35,8 @@ export class SettingsState {
   @Trace glassToggle: boolean = false;
   /** 液态玻璃滑块（试验性，默认关）：开启时所有 Slider 走 GL 渲染。 */
   @Trace glassSlider: boolean = false;
+  /** 液态玻璃弹窗（试验性，默认关）：开启时所有弹窗走液态玻璃样式渲染。 */
+  @Trace glassDialog: boolean = false;
 }
 
 /**
@@ -84,6 +86,8 @@ export class SettingsService {
       (await this.prefs.getBoolean(PrefKeys.GLASS_TOGGLE_ENABLED)) ?? false;
     this.state.glassSlider =
       (await this.prefs.getBoolean(PrefKeys.GLASS_SLIDER_ENABLED)) ?? false;
+    this.state.glassDialog =
+      (await this.prefs.getBoolean(PrefKeys.GLASS_DIALOG_ENABLED)) ?? false;
   }
 
   private async loadBiometricModality(key: string, legacy: boolean | null,
@@ -138,6 +142,12 @@ export class SettingsService {
     this.prefs.setBoolean(PrefKeys.GLASS_SLIDER_ENABLED, enabled);
   }
 
+  /** 液态玻璃弹窗（试验性，偏好 + 镜像同写）：开启时所有弹窗走液态玻璃样式渲染。 */
+  setGlassDialog(enabled: boolean): void {
+    this.state.glassDialog = enabled;
+    this.prefs.setBoolean(PrefKeys.GLASS_DIALOG_ENABLED, enabled);
+  }
+
   /** 液态玻璃总开关是否生效 */
   isGlassEffectsActive(): boolean {
     return this.state.glassEffects;
@@ -156,6 +166,11 @@ export class SettingsService {
   /** 液态玻璃滑块是否生效（总开关与子开关同时开启） */
   isGlassSliderActive(): boolean {
     return this.state.glassEffects && this.state.glassSlider;
+  }
+
+  /** 液态玻璃弹窗是否生效（总开关与子开关同时开启） */
+  isGlassDialogActive(): boolean {
+    return this.state.glassEffects && this.state.glassDialog;
   }
 
   /** 指纹解锁开关落状态（偏好 + 镜像同写）：偏好是唯一状态源（plan §1.5 v1.4）。 */

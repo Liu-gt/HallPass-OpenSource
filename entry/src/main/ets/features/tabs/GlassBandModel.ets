@@ -35,6 +35,17 @@ export const BAND_EXTRA_BOTTOM_VP: number = 48;  // 底部回弹方向（采样�
 const LEAD_LIMIT_VP: number = 8;
 
 /**
+ * 外推几帧（全局，所有页面的滚动同步模型共用）：玻璃比主内容晚上屏几帧就外推几帧。
+ * XComponent(TEXTURE) 的帧要等 UI 线程下一帧取走 → 晚 1 帧；SURFACE 由 RenderService 直接消费，
+ * 与主内容同一合成帧 → 0（见 GlassTabShell 的 GLASS_SURFACE_TYPE）。
+ */
+let leadFrames: number = 1;
+
+export function setGlassLeadFrames(frames: number): void {
+  leadFrames = frames;
+}
+
+/**
  * 镜像重排的量化阈值（vp）：镜像 Scroll 只在误差超过它时才 scrollTo。
  *
  * 小于阈值的滞后全部由 GL 采样位移补（当帧生效、观感连续），镜像树因此不必每帧
@@ -100,6 +111,11 @@ export class GlassBandModel {
    * 页面盒底边贴屏幕底，镜像用"底边对齐"反推原点（见 GlassTabMirror）。
    */
   @Trace viewportHeight: number = 0;
+  /**
+   * 主树页面盒在窗口里的上沿（vp，-1 = 未上报）：整屏导出纹理的行 0 = 页面盒上沿。
+   * 不能假设"页面盒底边贴窗口底"再反推 —— 子页面 / Navigation 根的高度与窗口不一致（差系统栏）。
+   */
+  viewportTop: number = -1;
   /** 镜像容器平移（vp）：越界回弹 / 跳转（镜像 Scroll 到不了的部分），见 GlassTabMirror。 */
   @Trace translateY: number = 0;
   private offsets: number[] = [0, 0, 0];
@@ -184,7 +200,7 @@ export class GlassBandModel {
    * @param resync 换内容（切页 / 重建）时 true：原生把锁存值一起重置（见 SetMirrorOffset）。
    */
   private pushVisual(resync: boolean = false): void {
-    this.pushContentOffset(this.visualY, this.lead);
+    this.pushContentOffset(this.visualY, this.lead * leadFrames);
     this.updateTranslate();
     this.pushMirrorOffset(this.appliedY + this.translateY, resync);
   }
@@ -283,7 +299,10 @@ export class GlassBandModel {
   }
 
   /** 主树滚动容器上报视口高度（接在 `.onAreaChange`）。 */
-  reportViewportHeight(heightVp: number): void {
+  reportViewportHeight(heightVp: number, topVp: number = -1): void {
+    if (topVp >= 0) {
+      this.viewportTop = topVp;
+    }
     if (heightVp > 0 && Math.abs(heightVp - this.viewportHeight) > 0.5) {
       this.viewportHeight = heightVp;
     }
@@ -331,6 +350,16 @@ export class GlassBandModel {
     this.pullY = 0;
     this.lead = 0;
     // 换的是另一页的内容：锁存值必须跟着重置，否则残差会算出上一页的一大截假位移
+    this.pushVisual(true);
+  }
+
+  /**
+   * 镜像内容切换到本模型所属页面（子页面压栈 / 出栈回到页签）：原生的偏移与锁存值
+   * 都换成本页的（全局只有一套采样补偿状态，谁在镜像里谁推）。
+   */
+  resync(): void {
+    this.pullY = 0;
+    this.lead = 0;
     this.pushVisual(true);
   }
 

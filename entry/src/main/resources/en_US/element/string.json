@@ -945,6 +945,10 @@
       "value": "Liquid glass slider"
     },
     {
+      "name": "settings_glass_dialog",
+      "value": "Liquid glass dialog"
+    },
+    {
       "name": "a11y_hint",
       "value": "View details"
     },

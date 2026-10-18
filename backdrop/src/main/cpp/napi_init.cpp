@@ -22,6 +22,7 @@ static napi_value Init(napi_env env, napi_value exports) {
         // ---- 目录场景（pages/catalog/*）----
         {"GlassGLSetScene", nullptr, glass::SetScene, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"GlassGLSetDensity", nullptr, glass::SetDensity, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"GlassGLSetDarkMode", nullptr, glass::SetDarkMode, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"GlassGLSetDebugMode", nullptr, glass::SetDebugMode, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"GlassGLSetPaused", nullptr, glass::SetPaused, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"GlassGLIsRunning", nullptr, glass::IsRunning, nullptr, nullptr, nullptr, napi_default, nullptr},
@@ -53,6 +54,18 @@ static napi_value Init(napi_env env, napi_value exports) {
         {"GlassGLWidgetSetColors", nullptr, glass::WidgetSetColors, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"GlassGLWidgetIsRunning", nullptr, glass::WidgetIsRunning, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"GlassGLWidgetDispose", nullptr, glass::WidgetDispose, nullptr, nullptr, nullptr, napi_default, nullptr},
+        // ---- HallPass 集成：玻璃对话框（Dialog）----
+        {"GlassGLDialogConfigure", nullptr, glass::DialogConfigure, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"GlassGLDialogSetBackdrop", nullptr, glass::DialogSetBackdrop, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"GlassGLDialogSetPress", nullptr, glass::DialogSetPress, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"GlassGLDialogSetGeometry", nullptr, glass::DialogSetGeometry, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"GlassGLDialogDispose", nullptr, glass::DialogDispose, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"GlassGLDialogIsReady", nullptr, glass::DialogIsReady, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"GlassGLDialogSetBackdropRect", nullptr, glass::DialogSetBackdropRect, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"GlassGLDialogSetLiveRect", nullptr, glass::DialogSetLiveRect, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"GlassGLDialogSetTransform", nullptr, glass::DialogSetTransform, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"GlassGLSetContentExport", nullptr, glass::SetContentExport, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"GlassGLSharedBackdropReady", nullptr, glass::SharedBackdropReady, nullptr, nullptr, nullptr, napi_default, nullptr},
     };
     napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc);
     // 若本次 Init 是 XComponent({libraryname:'backdrop'}) 触发的，注册经典 Surface 生命周期回调

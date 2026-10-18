@@ -6,6 +6,9 @@
 import { Spacing, Typography, Radius, Sizes, Shadows, Opacity } from '../design/Tokens';
 import { Motion } from '../design/Motion';
 import { ThemeService, ThemeState } from '../../application/theme/ThemeService';
+import { ServiceLocator } from '../../application/ServiceLocator';
+import { SettingsState } from '../../application/SettingsService';
+import { GlassDialogTokens } from '../design/GlassDialogTokens';
 import { SponsorDialogService } from '../../features/settings/sponsor/SponsorDialogService';
 import { SponsorState, SponsorDisplayTier, SPONSOR_TIERS } from '../../features/settings/sponsor/SponsorModel';
 import { common } from '@kit.AbilityKit';
@@ -13,7 +16,12 @@ import { common } from '@kit.AbilityKit';
 @ComponentV2
 export struct SponsorDialog {
   private theme: ThemeState = ThemeService.get().state;
+  private settings: SettingsState = ServiceLocator.settings().state;
   private service: SponsorDialogService = SponsorDialogService.get();
+
+  private isGlass(): boolean {
+    return this.settings.glassEffects && this.settings.glassDialog;
+  }
 
   build() {
     Column() {
@@ -23,15 +31,15 @@ export struct SponsorDialog {
         Row() {
           Column({ space: Spacing.xs }) {
             Text($r('app.string.sponsor_dialog_title'))
-              .fontSize(Typography.title3.size)
+              .fontSize(this.isGlass() ? GlassDialogTokens.titleFontSize : Typography.title3.size)
               .lineHeight(Typography.title3.lineHeight)
               .fontWeight(FontWeight.Bold)
-              .fontColor($r('app.color.label'))
+              .fontColor(this.isGlass() ? (this.theme.isDark ? GlassDialogTokens.titleTextDark : GlassDialogTokens.titleTextLight) : $r('app.color.label'))
 
             Text($r('app.string.sponsor_dialog_subtitle'))
               .fontSize(Typography.footnote.size)
               .lineHeight(Typography.footnote.lineHeight)
-              .fontColor($r('app.color.secondary_label'))
+              .fontColor(this.isGlass() ? (this.theme.isDark ? GlassDialogTokens.bodyTextDark : GlassDialogTokens.bodyTextLight) : $r('app.color.secondary_label'))
           }
           .alignItems(HorizontalAlign.Start)
           .layoutWeight(1)
@@ -40,11 +48,15 @@ export struct SponsorDialog {
           Button({ type: ButtonType.Circle }) {
             SymbolGlyph($r('sys.symbol.xmark'))
               .fontSize(16)
-              .fontColor([$r('app.color.secondary_label')])
+              .fontColor([this.isGlass() ? (this.theme.isDark ? GlassDialogTokens.secondaryTextDark : GlassDialogTokens.secondaryTextLight) : $r('app.color.secondary_label')])
           }
           .width(32)
           .height(32)
-          .backgroundColor($r('app.color.tertiary_system_background'))
+          .backgroundColor(this.isGlass() ? (this.theme.isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.35)') : $r('app.color.tertiary_system_background'))
+          .border(this.isGlass() ? {
+            width: 0.45,
+            color: this.theme.isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.25)'
+          } : { width: 0 })
           .margin({ left: Spacing.sm })
           .enabled(this.service.sponsorState !== SponsorState.PURCHASING && this.service.sponsorState !== SponsorState.DELIVERING)
           .onClick(() => this.service.handleBack())
@@ -95,11 +107,22 @@ export struct SponsorDialog {
 
             Button($r('app.string.sponsor_confirm_btn'))
               .type(ButtonType.Normal)
-              .width('80%')
-              .height(Sizes.control)
-              .borderRadius(Radius.pill(Sizes.control))
+              .width(this.isGlass() ? '100%' : '80%')
+              .height(this.isGlass() ? GlassDialogTokens.buttonHeight : Sizes.control)
+              .borderRadius(this.isGlass() ? GlassDialogTokens.buttonCornerRadius : Radius.pill(Sizes.control))
               .backgroundColor(this.theme.primary)
+              .border(this.isGlass() ? {
+                width: GlassDialogTokens.primaryBorderWidth,
+                color: GlassDialogTokens.primaryBorderColor
+              } : { width: 0 })
+              .shadow(this.isGlass() ? {
+                radius: GlassDialogTokens.primaryShadowRadius,
+                color: GlassDialogTokens.primaryShadowColor,
+                offsetY: GlassDialogTokens.primaryShadowOffsetY
+              } : { radius: 0 })
               .fontColor(this.theme.onPrimary)
+              .fontSize(this.isGlass() ? GlassDialogTokens.buttonFontSize : Typography.body.size)
+              .fontWeight(FontWeight.Bold)
               .margin({ top: Spacing.lg })
               .onClick(() => this.service.dismiss())
           }
@@ -137,16 +160,26 @@ export struct SponsorDialog {
                 LoadingProgress().width(18).height(18).color(this.theme.onPrimary)
               }
               Text(this.actionButtonText())
-                .fontSize(Typography.headline.size)
-                .fontWeight(FontWeight.Medium)
+                .fontSize(this.isGlass() ? GlassDialogTokens.buttonFontSize : Typography.headline.size)
+                .fontWeight(FontWeight.Bold)
                 .fontColor(this.theme.onPrimary)
             }
           }
           .width('100%')
-          .height(Sizes.control)
-          .borderRadius(Radius.pill(Sizes.control))
+          .height(this.isGlass() ? GlassDialogTokens.buttonHeight : Sizes.control)
+          .borderRadius(this.isGlass() ? GlassDialogTokens.buttonCornerRadius : Radius.pill(Sizes.control))
+          .clip(true)
           .backgroundColor(this.theme.primary)
-          .margin({ top: Spacing.lg })
+          .border(this.isGlass() ? {
+            width: GlassDialogTokens.primaryBorderWidth,
+            color: GlassDialogTokens.primaryBorderColor
+          } : { width: 0 })
+          .shadow(this.isGlass() ? {
+            radius: GlassDialogTokens.primaryShadowRadius,
+            color: GlassDialogTokens.primaryShadowColor,
+            offsetY: GlassDialogTokens.primaryShadowOffsetY
+          } : { radius: 0 })
+          .margin({ top: this.isGlass() ? GlassDialogTokens.spacingBodyButtons : Spacing.lg })
           .enabled(this.service.sponsorState === SponsorState.READY)
           .opacity(this.service.sponsorState === SponsorState.READY ? 1.0 : Opacity.disabled)
           .onClick(() => {
@@ -155,13 +188,26 @@ export struct SponsorDialog {
           })
         }
       }
-      .padding(Spacing.xl)
-      .borderRadius(Radius.xl)
-      .backgroundColor($r('app.color.secondary_system_background'))
+      .padding(this.isGlass() ? {
+        left: GlassDialogTokens.paddingHorizontal,
+        right: GlassDialogTokens.paddingHorizontal,
+        top: GlassDialogTokens.paddingTop,
+        bottom: GlassDialogTokens.paddingBottom
+      } : Spacing.xl)
+      .borderRadius(this.isGlass() ? GlassDialogTokens.panelCornerRadius : Radius.xl)
+      .backgroundColor(this.isGlass() ? (this.theme.isDark ? GlassDialogTokens.panelSurfaceDark : GlassDialogTokens.panelSurfaceLight) : $r('app.color.secondary_system_background'))
+      .backgroundBlurStyle(this.isGlass() ? BlurStyle.COMPONENT_THICK : BlurStyle.NONE, {
+        colorMode: this.theme.isDark ? ThemeColorMode.DARK : ThemeColorMode.LIGHT,
+        adaptiveColor: AdaptiveColor.DEFAULT
+      })
+      .border(this.isGlass() ? {
+        width: GlassDialogTokens.panelBorderWidth,
+        color: this.theme.isDark ? GlassDialogTokens.panelBorderDark : GlassDialogTokens.panelBorderLight
+      } : { width: 0 })
       .shadow({
-        radius: Shadows.dialog.radius,
-        color: Shadows.dialog.color,
-        offsetY: Shadows.dialog.offsetY
+        radius: this.isGlass() ? GlassDialogTokens.panelShadowRadius : Shadows.dialog.radius,
+        color: this.isGlass() ? GlassDialogTokens.panelShadowColor : Shadows.dialog.color,
+        offsetY: this.isGlass() ? GlassDialogTokens.panelShadowOffsetY : Shadows.dialog.offsetY
       })
       .margin({ left: Spacing.lg, right: Spacing.lg })
       .constraintSize({ maxWidth: 440 })
@@ -173,7 +219,7 @@ export struct SponsorDialog {
     .height('100%')
     .justifyContent(FlexAlign.Center)
     .alignItems(HorizontalAlign.Center)
-    .backgroundColor($r('app.color.scrim'))
+    .backgroundColor(this.isGlass() ? GlassDialogTokens.scrimColor : $r('app.color.scrim'))
     .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
     .onClick(() => {
       this.service.handleBack();
@@ -215,6 +261,7 @@ export struct SponsorDialog {
 @ComponentV2
 struct SponsorTierCard {
   private theme: ThemeState = ThemeService.get().state;
+  private settings: SettingsState = ServiceLocator.settings().state;
   private service: SponsorDialogService = SponsorDialogService.get();
   @Param @Require tier: SponsorDisplayTier = {
     config: SPONSOR_TIERS[0],
@@ -222,6 +269,10 @@ struct SponsorTierCard {
     name: '',
     isValid: true
   };
+
+  private isGlass(): boolean {
+    return this.settings.glassEffects && this.settings.glassDialog;
+  }
 
   build() {
     Column({ space: Spacing.xs }) {
@@ -257,11 +308,17 @@ struct SponsorTierCard {
     .justifyContent(FlexAlign.Center)
     .padding({ top: Spacing.sm, bottom: Spacing.sm, left: Spacing.xs, right: Spacing.xs })
     .borderRadius(Radius.md)
-    .backgroundColor(this.service.selectedTierId === this.tier.config.id ?
-      $r('app.color.secondary_system_background') : $r('app.color.tertiary_system_background'))
+    .backgroundColor(this.isGlass() ?
+      (this.service.selectedTierId === this.tier.config.id ?
+        (this.theme.isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(255, 255, 255, 0.45)') :
+        (this.theme.isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.22)')) :
+      (this.service.selectedTierId === this.tier.config.id ?
+        $r('app.color.secondary_system_background') : $r('app.color.tertiary_system_background')))
     .border({
-      width: this.service.selectedTierId === this.tier.config.id ? 1.5 : Sizes.hairline,
-      color: this.service.selectedTierId === this.tier.config.id ? this.theme.primary : $r('app.color.separator')
+      width: this.service.selectedTierId === this.tier.config.id ? 1.5 : (this.isGlass() ? 0.45 : Sizes.hairline),
+      color: this.service.selectedTierId === this.tier.config.id ?
+        this.theme.primary :
+        (this.isGlass() ? (this.theme.isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.20)') : $r('app.color.separator'))
     })
     .opacity(this.tier.isValid ? 1.0 : Opacity.disabled)
     .alignItems(HorizontalAlign.Center)

@@ -57,6 +57,8 @@ export class SettingsViewModel {
   @Trace glassToggle: boolean = false;
   /** 试验性：液态玻璃滑块控件（开启后所有 Slider 走 GL 渲染）。 */
   @Trace glassSlider: boolean = false;
+  /** 试验性：液态玻璃弹窗（开启后所有弹窗走液态玻璃样式）。 */
+  @Trace glassDialog: boolean = false;
   @Trace themeId: string = AppTheme.defaultTheme.id;
   @Trace colorMode: ColorModePreference = 'system';
   /** 生效深色（主题色点取色用，随 ThemeService 同步）。 */
@@ -84,6 +86,7 @@ export class SettingsViewModel {
     this.glassTabBar = settings.glassTabBar;
     this.glassToggle = settings.glassToggle;
     this.glassSlider = settings.glassSlider;
+    this.glassDialog = settings.glassDialog;
     this.themeId = ThemeService.get().state.themeId;
     this.colorMode = ThemeService.get().state.colorMode;
     this.isDark = ThemeService.get().state.isDark;
@@ -357,6 +360,12 @@ export class SettingsViewModel {
   setGlassSlider(enabled: boolean): void {
     this.glassSlider = enabled;
     ServiceLocator.settings().setGlassSlider(enabled);
+  }
+
+  /** 试验性：液态玻璃弹窗（写偏好；各弹窗组件监听设置状态即时切换）。 */
+  setGlassDialog(enabled: boolean): void {
+    this.glassDialog = enabled;
+    ServiceLocator.settings().setGlassDialog(enabled);
   }
 
   /** 退出登录（spec F13：二次确认由页面负责；清除全部密文缓存/Asset 密钥/KDF 缓存）。 */

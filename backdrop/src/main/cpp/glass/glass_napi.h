@@ -23,9 +23,10 @@ napi_value GlassGLSetScrollRegion(napi_env env, napi_callback_info info);
 napi_value SetNumber(napi_env env, napi_callback_info info);
 napi_value SetBool(napi_env env, napi_callback_info info);
 
-/** 目录场景：切场景 / 上报显示密度。 */
+/** 目录场景：切场景 / 上报显示密度 / 同步系统深浅色。 */
 napi_value SetScene(napi_env env, napi_callback_info info);
 napi_value SetDensity(napi_env env, napi_callback_info info);
+napi_value SetDarkMode(napi_env env, napi_callback_info info);
 
 /** 消融/调试模式。 */
 napi_value SetDebugMode(napi_env env, napi_callback_info info);
@@ -116,6 +117,25 @@ napi_value WidgetSetPress(napi_env env, napi_callback_info info);
 napi_value WidgetSetColors(napi_env env, napi_callback_info info);
 napi_value WidgetIsRunning(napi_env env, napi_callback_info info);
 napi_value WidgetDispose(napi_env env, napi_callback_info info);
+
+/**
+ * 对话框（Dialog）：一个 XComponent 一个渲染实例，按 id 寻址。
+ * - `DialogConfigure(id, buttonCount, panelHeightDp, density, dark)`
+ * - `DialogSetBackdrop(id, data, width, height, stride)`
+ * - `DialogSetPress(id, buttonIndex, pressed)`
+ * - `DialogDispose(id)`
+ */
+napi_value DialogConfigure(napi_env env, napi_callback_info info);
+napi_value DialogSetBackdrop(napi_env env, napi_callback_info info);
+napi_value DialogSetPress(napi_env env, napi_callback_info info);
+napi_value DialogSetGeometry(napi_env env, napi_callback_info info);
+napi_value DialogDispose(napi_env env, napi_callback_info info);
+napi_value DialogIsReady(napi_env env, napi_callback_info info);
+napi_value DialogSetBackdropRect(napi_env env, napi_callback_info info);
+napi_value DialogSetLiveRect(napi_env env, napi_callback_info info);
+napi_value DialogSetTransform(napi_env env, napi_callback_info info);
+napi_value SetContentExport(napi_env env, napi_callback_info info);
+napi_value SharedBackdropReady(napi_env env, napi_callback_info info);
 
 /**
  * 注册/注销"GL 里画的顶部按钮被点击"的回调（ArkTS：`GlassGLRegisterMenuCallback`）。

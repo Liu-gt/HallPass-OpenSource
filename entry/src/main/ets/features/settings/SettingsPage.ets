@@ -573,6 +573,13 @@ export struct SettingsPage {
                   (enabled: boolean): void => {
                     this.viewModel.setGlassSlider(enabled);
                   })
+                this.rowDivider()
+                this.toggleRow($r('app.string.settings_glass_dialog'), '',
+                  (): boolean => this.viewModel.glassEffects,
+                  (): boolean => this.viewModel.glassDialog,
+                  (enabled: boolean): void => {
+                    this.viewModel.setGlassDialog(enabled);
+                  })
               }
               .width('100%')
             }
@@ -610,8 +617,10 @@ export struct SettingsPage {
         .height('100%')
         .align(Alignment.Top)
         // 滚动位移上报：玻璃条带镜像据此同帧跟随（主树上报视觉偏移 + 边界增量；镜像树只回自己的落点）
-        .onDidScroll((scrollOffset: number, scrollState: ScrollState) => {
-          this.reportBandOffset(scrollOffset)
+        // Scroll 的回调是 (xOffset, yOffset, scrollState)（List 才是 (scrollOffset, scrollState)）：
+        // 按 List 的签名写会把恒为 0 的 xOffset 当位移（一帧外推 / 越界增量全丢）、把位移当状态
+        .onDidScroll((_xOffset: number, yOffset: number, scrollState: ScrollState) => {
+          this.reportBandOffset(yOffset)
           this.reportMirrorOffset()
           // 停下时请求一次精确对齐：滚动中量化留下的偏差在这里收敛（见 mirrorNeedsReposition）。
           // 主树侧感知得到 Idle，但只有镜像侧能 scrollTo —— 走模型的信号量转发（对齐由 @Monitor 执行）。
@@ -644,7 +653,7 @@ export struct SettingsPage {
     // 两者同高；统一用页面盒，镜像原点按"底边对齐屏幕底"反推。
     .onAreaChange((_oldValue: Area, newValue: Area): void => {
       if (!this.passive && !this.isMirrorContext) {
-        this.band.reportViewportHeight(Number(newValue.height))
+        this.band.reportViewportHeight(Number(newValue.height), Number(newValue.globalPosition.y))
       }
     })
   }

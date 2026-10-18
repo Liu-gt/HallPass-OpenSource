@@ -23,6 +23,9 @@ export const GlassGLSetScene: (scene: number) => void
 /** 上报显示密度（vp -> px），用于原生侧按 dp 排版。缺省 4。 */
 export const GlassGLSetDensity: (density: number) => void
 
+/** 同步系统深浅色模式（深色模式下弹窗等组件自动切换暗色通透玻璃与浅色文字）。 */
+export const GlassGLSetDarkMode: (dark: boolean) => void
+
 /** 消融/调试模式：0=正常，1=只画背景，2=只画折射，3=不画玻璃。 */
 export const GlassGLSetDebugMode: (mode: number) => void
 
@@ -181,3 +184,55 @@ export const GlassGLRegisterMenuCallback: (callback: (target: number) => void) =
 
 /** 注销上面的回调（页面 aboutToDisappear 里调）。 */
 export const GlassGLUnregisterMenuCallback: () => void
+
+// ---------------------------------------------------------------------------
+// HallPass：玻璃对话框（Dialog）
+// ---------------------------------------------------------------------------
+
+/** 绑定配置：id 必须以 glassDialog 开头；buttonCount 0/1/2；panelHeightDp 自定义高度（0=默认209dp）；density = vp2px(1)；dark 是否深色模式。 */
+export const GlassGLDialogConfigure: (id: string, buttonCount: number, panelHeightDp: number, density: number, dark: boolean) => void
+
+/** 设置对话框采样背景（即底层画面的 RGBA 像素数据）。 */
+export const GlassGLDialogSetBackdrop: (id: string, data: ArrayBuffer, width: number, height: number, rowBytes: number) => void
+
+/** 同步按钮按压状态（buttonIndex: 0=Cancel/OK, 1=Confirm）。 */
+export const GlassGLDialogSetPress: (id: string, buttonIndex: number, pressed: boolean) => void
+
+export interface DialogGeometryRect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/** 设置对话框精确卡片及按钮顶层绝对坐标（px，屏幕左上角为原点）。 */
+export const GlassGLDialogSetGeometry: (
+  id: string,
+  cardX: number,
+  cardY: number,
+  cardW: number,
+  cardH: number,
+  buttons: DialogGeometryRect[]
+) => void
+
+/** 对话框关闭时释放渲染实例。 */
+export const GlassGLDialogDispose: (id: string) => void
+
+/** 首帧（真实背景 + 卡片几何）是否已交出：ArkTS 文字层等它为 true 再显示。 */
+export const GlassGLDialogIsReady: (id: string) => boolean
+
+/** 背景快照在 XComponent surface 里的矩形（px，左上原点）；快照可降采样，按此矩形拉伸 1:1 对齐。 */
+export const GlassGLDialogSetBackdropRect: (id: string, x: number, y: number, w: number, h: number) => void
+
+/** 实时背景（共享镜像纹理）在 XComponent surface 里的矩形（px，左上原点）；w <= 0 关闭、回退快照。 */
+export const GlassGLDialogSetLiveRect: (id: string, x: number, y: number, w: number, h: number) => void
+
+/** 出现 / 消失动效：玻璃整体绕 pivot（surface px，左上原点）缩放 scale，原生按真实位置绘制（折射跟随真实背景）。 */
+export const GlassGLDialogSetTransform: (id: string, scale: number, pivotX: number, pivotY: number) => void
+
+/** 镜像实际导出的上沿余量（vp，< 0 = 与页签条带余量相同）：有整屏消费者时放开到整页。 */
+export const GlassGLSetContentExport: (extraTopVp: number) => void
+
+/** 页签中枢在跑且收到过镜像帧：弹窗可走实时背景（否则用快照）。 */
+export const GlassGLSharedBackdropReady: () => boolean
+

@@ -945,6 +945,10 @@
       "value": "液态玻璃滑块"
     },
     {
+      "name": "settings_glass_dialog",
+      "value": "液态玻璃弹窗"
+    },
+    {
       "name": "a11y_hint",
       "value": "查看说明"
     },

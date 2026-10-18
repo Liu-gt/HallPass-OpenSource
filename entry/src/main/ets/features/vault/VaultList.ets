@@ -27,6 +27,11 @@ export struct VaultList {
   @Param band: GlassBandModel = new GlassBandModel();
   /** 镜像树标记：只渲染、滚动被动跟随（主树照常上报）。 */
   @Param passive: boolean = false;
+  /**
+   * 是否以列表框作为镜像视口上报（页签页：列表即页面主体）。子页面列表上方还有固定头部，
+   * 视口必须是整个页面盒 —— 由页面自己上报，这里传 false。
+   */
+  @Param reportsViewport: boolean = true;
   @Param onOpenDetail: (cipherId: string) => void = (_id: string): void => {
   };
   @Param onEditItem: (cipherId: string) => void = (_id: string): void => {
@@ -377,8 +382,8 @@ export struct VaultList {
         })
         // 视口高度上报：镜像按同一高度布局（主树在 Tabs 里会被安全区再收一档）
         .onAreaChange((_oldValue: Area, newValue: Area): void => {
-          if (!this.passive && !this.isMirrorContext) {
-            this.band.reportViewportHeight(Number(newValue.height));
+          if (!this.passive && !this.isMirrorContext && this.reportsViewport) {
+            this.band.reportViewportHeight(Number(newValue.height), Number(newValue.globalPosition.y));
           }
         })
       }

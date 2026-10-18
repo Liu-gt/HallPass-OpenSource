@@ -17,6 +17,9 @@ import { ServiceLocator } from '../../application/ServiceLocator';
 import { SystemBar } from '../../common/design/SystemBar';
 import { ItemEditParam } from './ItemEditPage';
 import { PasswordHistoryParam } from './PasswordHistoryPage';
+import { GlassBandModel } from '../tabs/GlassBandModel';
+import { MirrorRouter, MirrorPageEntry } from '../mirror/MirrorRouter';
+import { MirroredScroll } from '../mirror/MirroredScroll';
 
 type FieldRowAlias = FieldView;
 
@@ -27,44 +30,35 @@ export interface ItemDetailParam {
 }
 
 /**
+ * 条目详情页的全部可见状态（外壳持有，主树与镜像树同一实例，见 features/mirror/MirrorRouter）。
+ */
+@ObservedV2
+export class ItemDetailState {
+  readonly viewModel: ItemDetailViewModel = new ItemDetailViewModel();
+  @Trace cipherId: string = '';
+  @Trace backTitle: string = '';
+  @Trace toastText: string | null = null;
+  @Trace visibleCustomFieldIndexes: number[] = [];
+}
+
+/**
  * 条目详情页（票 18，spec F7/F15/F9）：分区卡片（登录信息/备注/自定义字段/附件/更多），
  * 密码遮蔽/眼睛切换/4 段强度条、TOTP 实时行、附件下载（下载中/离线反馈）、
  * 更多卡（文件夹/更新时间/删除 danger）；安全笔记不渲染登录信息卡，空卡不渲染。
+ *
+ * 内容组件（主树 / 镜像树共用）；passive = true（镜像树）只渲染、滚动跟随主树，不响应任何操作。
  */
 @ComponentV2
-export struct ItemDetailPage {
+export struct ItemDetailContent {
   /** 品牌色响应源（T24：主题切换经 ThemeState 即时生效）。 */
   private theme: ThemeState = ThemeService.get().state;
   @Consumer('navStack') navStack: NavPathStack = new NavPathStack();
-  @Local private viewModel: ItemDetailViewModel = new ItemDetailViewModel();
-  @Local private cipherId: string = '';
-  @Local private backTitle: string = '';
-  @Local private toastText: string | null = null;
-  @Local private visibleCustomFieldIndexes: number[] = [];
+  @Require @Param state: ItemDetailState;
+  @Require @Param band: GlassBandModel;
+  @Param passive: boolean = false;
   private toastTimer: number = -1;
 
-  aboutToAppear(): void {
-    this.setStatusBarContentColor();
-    // navDestination 参数在 onReady 回调注入（Index.PagesMap push 传参，plan §1.2）
-  }
-
-  private setStatusBarContentColor(): void {
-    SystemBar.apply(this.theme.isDark);
-  }
-
-  private onReady(param: object): void {
-    const record: Record<string, Object> = param as Record<string, Object>;
-    const id: Object | undefined = record['cipherId'];
-    const backTitle: Object | undefined = record['backTitle'];
-    if (typeof id === 'string') {
-      this.cipherId = id as string;
-      this.backTitle = typeof backTitle === 'string' ? backTitle as string : '';
-      this.viewModel.init(this.cipherId);
-    }
-  }
-
   aboutToDisappear(): void {
-    this.viewModel.onDisappear();
     if (this.toastTimer !== -1) {
       clearTimeout(this.toastTimer);
       this.toastTimer = -1;
@@ -73,19 +67,19 @@ export struct ItemDetailPage {
 
   private showToast(text: ResourceStr): void {
     // Resource 不能直接 toString（产物为 [object Object]）；字符串直用，$r 经资源管理器解析
-    this.toastText = typeof text === 'string' ? text as string
+    this.state.toastText = typeof text === 'string' ? text as string
       : getContext(this).resourceManager.getStringSync(text as Resource);
     if (this.toastTimer !== -1) {
       clearTimeout(this.toastTimer);
     }
     this.toastTimer = setTimeout((): void => {
-      this.toastText = null;
+      this.state.toastText = null;
       this.toastTimer = -1;
     }, 1800);
   }
 
   private copy(text: string): void {
-    if (text.length === 0) {
+    if (this.passive || text.length === 0) {
       return;
     }
     ServiceLocator.clipboard().copy(text);
@@ -94,6 +88,9 @@ export struct ItemDetailPage {
 
   /** 删除二次确认：根级弹窗（覆盖页签栏与状态栏，选择前阻断交互）。 */
   private requestDelete(): void {
+    if (this.passive) {
+      return;
+    }
     ConfirmDialogService.get().show({
       title: $r('app.string.menu_delete'),
       body: $r('app.string.delete_confirm_body'),
@@ -102,7 +99,7 @@ export struct ItemDetailPage {
       onCancel: (): void => {
       },
       onConfirm: (): void => {
-        this.viewModel.softDelete().then((): void => {
+        this.state.viewModel.softDelete().then((): void => {
           this.navStack.pop();
         });
       }
@@ -111,12 +108,12 @@ export struct ItemDetailPage {
 
   /** 从详情页直接进入对应条目的编辑表单。 */
   private openEdit(): void {
-    if (this.cipherId.length === 0) {
+    if (this.passive || this.state.cipherId.length === 0) {
       return;
     }
     const param: ItemEditParam = {
-      cipherId: this.cipherId,
-      backTitle: this.viewModel.view?.name ?? this.backTitle
+      cipherId: this.state.cipherId,
+      backTitle: this.state.viewModel.view?.name ?? this.state.backTitle
     };
     this.navStack.pushPathByName('ItemEdit', param);
   }
@@ -160,12 +157,12 @@ export struct ItemDetailPage {
     .padding({ left: GroupedList.rowHorizontal, right: GroupedList.rowHorizontal,
       top: GroupedList.rowVertical, bottom: GroupedList.rowVertical })
       .onClick(() => {
-        if (this.cipherId.length === 0) {
+        if (this.passive || this.state.cipherId.length === 0) {
           return;
         }
         const param: PasswordHistoryParam = {
-          cipherId: this.cipherId,
-          backTitle: this.viewModel.view?.name ?? this.backTitle
+          cipherId: this.state.cipherId,
+          backTitle: this.state.viewModel.view?.name ?? this.state.backTitle
         };
         this.navStack.pushPathByName('PasswordHistory', param);
       })
@@ -252,7 +249,8 @@ export struct ItemDetailPage {
           // 详情页布尔字段只读展示（与 ArkUI 开关的 enabled(false) 语义一致）
           GlassToggle({
             isOn: field.value === 'true',
-            isEnabled: false
+            isEnabled: false,
+            passive: this.passive
           })
         }
         .width('100%')
@@ -312,16 +310,19 @@ export struct ItemDetailPage {
   }
 
   private toggleCustomFieldVisibility(index: number): void {
-    if (this.visibleCustomFieldIndexes.indexOf(index) >= 0) {
-      this.visibleCustomFieldIndexes = this.visibleCustomFieldIndexes.filter(
+    if (this.passive) {
+      return;
+    }
+    if (this.state.visibleCustomFieldIndexes.indexOf(index) >= 0) {
+      this.state.visibleCustomFieldIndexes = this.state.visibleCustomFieldIndexes.filter(
         (visibleIndex: number): boolean => visibleIndex !== index);
       return;
     }
-    this.visibleCustomFieldIndexes = [...this.visibleCustomFieldIndexes, index];
+    this.state.visibleCustomFieldIndexes = [...this.state.visibleCustomFieldIndexes, index];
   }
 
   private isCustomFieldVisible(index: number): boolean {
-    return this.visibleCustomFieldIndexes.indexOf(index) >= 0;
+    return this.state.visibleCustomFieldIndexes.indexOf(index) >= 0;
   }
 
   @Builder
@@ -333,7 +334,7 @@ export struct ItemDetailPage {
         .lineHeight(GroupedList.primaryText.lineHeight)
         .fontColor($r('app.color.label'))
       Column() {
-        Text(this.viewModel.passwordVisible ? value : maskPassword(value))
+        Text(this.state.viewModel.passwordVisible ? value : maskPassword(value))
           .fontSize(GroupedList.secondaryText.size)
           .lineHeight(GroupedList.secondaryText.lineHeight)
           .fontColor($r('app.color.secondary_label'))
@@ -342,13 +343,13 @@ export struct ItemDetailPage {
           .constraintSize({ maxWidth: '100%' })
           .bindMenu(this.copyMenu($r('app.string.swipe_copy_password'), (): void => {
             this.copy(value);
-            this.viewModel.touchPasswordUsed();
+            this.state.viewModel.touchPasswordUsed();
           }))
           .onTouch((event: TouchEvent) => {
-            if (event.type === TouchType.Up && !this.viewModel.passwordVisible) {
+            if (!this.passive && event.type === TouchType.Up && !this.state.viewModel.passwordVisible) {
               // 先让系统完成 bindMenu 的手势处理；同步重绘会取消首击的菜单弹出。
               setTimeout(() => {
-                this.viewModel.revealPassword();
+                this.state.viewModel.revealPassword();
               }, 50);
             }
           })
@@ -549,15 +550,15 @@ export struct ItemDetailPage {
         .lineHeight(GroupedList.primaryText.lineHeight)
         .fontColor($r('app.color.label'))
       Blank()
-      Text(this.viewModel.totpCode)
+      Text(this.state.viewModel.totpCode)
         .fontSize(Typography.headline.size)
         .lineHeight(Typography.headline.lineHeight)
         .fontWeight(Typography.headline.weight)
         .fontColor(this.theme.primary)
         .bindMenu(this.copyMenu($r('app.string.a11y_copy_code'), (): void => {
-          this.copy(this.viewModel.totpCode);
+          this.copy(this.state.viewModel.totpCode);
         }))
-      Progress({ value: this.viewModel.totpRemaining, total: 30, type: ProgressType.Ring })
+      Progress({ value: this.state.viewModel.totpRemaining, total: 30, type: ProgressType.Ring })
         .width(Sizes.totpRing)
         .height(Sizes.totpRing)
         .style({ strokeWidth: 2 })
@@ -602,10 +603,13 @@ export struct ItemDetailPage {
       .width(Sizes.touchMin)
       .height(Sizes.touchMin)
       .justifyContent(FlexAlign.Center)
-      .opacity(this.viewModel.downloadingIds.indexOf(attachment.id) >= 0
+      .opacity(this.state.viewModel.downloadingIds.indexOf(attachment.id) >= 0
         ? Opacity.disabled : 1)
       .onClick(() => {
-        this.viewModel.downloadAttachment(attachment).then((result: string): void => {
+        if (this.passive) {
+          return;
+        }
+        this.state.viewModel.downloadAttachment(attachment).then((result: string): void => {
           if (result === 'network') {
             this.showToast($r('app.string.login_error_network'));
           } else if (result === 'ok') {
@@ -665,7 +669,7 @@ export struct ItemDetailPage {
           SymbolGlyph($r('sys.symbol.chevron_left'))
             .fontSize(Sizes.rowIcon)
             .fontColor([this.theme.primary])
-          Text(this.backTitle)
+          Text(this.state.backTitle)
             .fontSize(Typography.subhead.size)
             .lineHeight(Typography.subhead.lineHeight)
             .fontColor(this.theme.primary)
@@ -673,13 +677,16 @@ export struct ItemDetailPage {
         .layoutWeight(1)
         .constraintSize({ minHeight: Sizes.touchMin })
         .onClick(() => {
+          if (this.passive) {
+            return;
+          }
           this.navStack.pop();
         })
 
         // 仅保留 SymbolGlyph；透明无边框热区保证 44vp 点击面积。
         Row({ space: Spacing.xs }) {
           Button() {
-            SymbolGlyph(this.viewModel.view?.favorite
+            SymbolGlyph(this.state.viewModel.view?.favorite
               ? $r('sys.symbol.star_fill') : $r('sys.symbol.star'))
               .fontSize(Sizes.rowIcon)
               .fontColor([this.theme.primary])
@@ -691,10 +698,13 @@ export struct ItemDetailPage {
           .backgroundColor(Color.Transparent)
           .border({ width: 0 })
           .stateEffect(false)
-          .accessibilityText(this.viewModel.view?.favorite
+          .accessibilityText(this.state.viewModel.view?.favorite
             ? $r('app.string.unfavorite') : $r('app.string.a11y_favorite'))
           .onClick(() => {
-            this.viewModel.toggleFavorite();
+            if (this.passive) {
+              return;
+            }
+            this.state.viewModel.toggleFavorite();
           })
 
           Button() {
@@ -719,7 +729,7 @@ export struct ItemDetailPage {
       .padding({ left: Spacing.page, right: Spacing.page })
 
       Column() {
-        Text(this.viewModel.view?.name ?? '')
+        Text(this.state.viewModel.view?.name ?? '')
           .fontSize(Typography.largeTitle.size)
           .lineHeight(Typography.largeTitle.lineHeight)
           .fontWeight(Typography.largeTitle.weight)
@@ -740,140 +750,196 @@ export struct ItemDetailPage {
   }
 
   build() {
-    NavDestination() {
-      Stack() {
-        if (this.viewModel.view !== null) {
+    Stack() {
+      if (this.state.viewModel.view !== null) {
+        Column() {
+          this.detailTitleBar()
+          // 自定义组件尾随闭包后不能再挂属性：外包一层承载 layoutWeight
           Column() {
-            this.detailTitleBar()
-            Scroll() {
-              Column() {
-              // Refresh cached builder values on every projection update, not only navigation.
-              ForEach([this.viewModel.renderEpoch], (_epoch: number) => {
-              Column() {
-              if (this.viewModel.view !== null) {
-                this.headerBlock(this.viewModel.view)
+          MirroredScroll({ band: this.band, passive: this.passive }) {
+            Column() {
+            // Refresh cached builder values on every projection update, not only navigation.
+            ForEach([this.state.viewModel.renderEpoch], (_epoch: number) => {
+            Column() {
+            if (this.state.viewModel.view !== null) {
+              this.headerBlock(this.state.viewModel.view)
 
-                if (this.viewModel.view.type === 1) {
-                  AppGroup({ title: $r('app.string.detail_login') }) {
-                    if ((this.viewModel.view?.username ?? '').length > 0) {
-                      this.fieldRow($r('app.string.detail_username'), this.viewModel.view?.username ?? '',
-                        true, (): void => this.copy(this.viewModel.view?.username ?? ''),
-                        $r('app.string.swipe_copy_username'),
-                        (this.viewModel.view?.password.length ?? 0) > 0
-                          || (this.viewModel.view?.totpSecret.length ?? 0) > 0
-                          || (this.viewModel.view?.uris.length ?? 0) > 0)
-                    }
-                    if ((this.viewModel.view?.password ?? '').length > 0) {
-                      this.passwordRow(this.viewModel.view?.password ?? '', true)
-                      this.passwordStrengthRow(this.viewModel.view?.password ?? '',
-                        (this.viewModel.view?.totpSecret.length ?? 0) > 0
-                          || (this.viewModel.view?.uris.length ?? 0) > 0)
-                    }
-                    if ((this.viewModel.view?.totpSecret ?? '').length > 0) {
-                      this.totpRow(this.viewModel.view as CipherView,
-                        (this.viewModel.view?.uris.length ?? 0) > 0)
-                    }
-                    ForEach(this.viewModel.view?.uris ?? [], (uri: string, index: number) => {
-                      this.fieldRow($r('app.string.detail_uri'), uri, true,
-                        (): void => this.copy(uri), $r('app.string.a11y_copy'),
-                        index < (this.viewModel.view?.uris.length ?? 0) - 1)
-                    }, (uri: string) => uri)
+              if (this.state.viewModel.view.type === 1) {
+                AppGroup({ title: $r('app.string.detail_login') }) {
+                  if ((this.state.viewModel.view?.username ?? '').length > 0) {
+                    this.fieldRow($r('app.string.detail_username'), this.state.viewModel.view?.username ?? '',
+                      true, (): void => this.copy(this.state.viewModel.view?.username ?? ''),
+                      $r('app.string.swipe_copy_username'),
+                      (this.state.viewModel.view?.password.length ?? 0) > 0
+                        || (this.state.viewModel.view?.totpSecret.length ?? 0) > 0
+                        || (this.state.viewModel.view?.uris.length ?? 0) > 0)
                   }
-                }
-
-                if (this.viewModel.view.type === 3) {
-                  this.cardSection(this.viewModel.view)
-                }
-
-                if (this.viewModel.view.type === 4) {
-                  this.identitySection(this.viewModel.view)
-                }
-
-                if ((this.viewModel.view?.notes ?? '').length > 0) {
-                  AppGroup({ title: $r('app.string.detail_note'),
-                    contentPadding: GroupedList.cardPadding }) {
-                    Text(this.viewModel.view?.notes ?? '')
-                      .fontSize(Typography.callout.size)
-                      .lineHeight(Typography.callout.lineHeight)
-                      .fontColor($r('app.color.secondary_label'))
-                      .width('100%')
+                  if ((this.state.viewModel.view?.password ?? '').length > 0) {
+                    this.passwordRow(this.state.viewModel.view?.password ?? '', true)
+                    this.passwordStrengthRow(this.state.viewModel.view?.password ?? '',
+                      (this.state.viewModel.view?.totpSecret.length ?? 0) > 0
+                        || (this.state.viewModel.view?.uris.length ?? 0) > 0)
                   }
+                  if ((this.state.viewModel.view?.totpSecret ?? '').length > 0) {
+                    this.totpRow(this.state.viewModel.view as CipherView,
+                      (this.state.viewModel.view?.uris.length ?? 0) > 0)
+                  }
+                  ForEach(this.state.viewModel.view?.uris ?? [], (uri: string, index: number) => {
+                    this.fieldRow($r('app.string.detail_uri'), uri, true,
+                      (): void => this.copy(uri), $r('app.string.a11y_copy'),
+                      index < (this.state.viewModel.view?.uris.length ?? 0) - 1)
+                  }, (uri: string) => uri)
                 }
+              }
 
-                if ((this.viewModel.view?.fields.length ?? 0) > 0) {
-                  AppGroup({ title: $r('app.string.detail_fields') }) {
-                    ForEach(this.viewModel.view?.fields ?? [], (field: FieldRowAlias,
-                      index: number) => {
-                      this.customFieldRow(field, index,
-                        index < (this.viewModel.view?.fields.length ?? 0) - 1)
-                    }, (_field: FieldRowAlias, index: number) => `${index}`)
-                  }
-                }
+              if (this.state.viewModel.view.type === 3) {
+                this.cardSection(this.state.viewModel.view)
+              }
 
-                if ((this.viewModel.view?.attachments.length ?? 0) > 0) {
-                  AppGroup({ title: $r('app.string.detail_attachments') }) {
-                    ForEach(this.viewModel.view?.attachments ?? [],
-                      (attachment: AttachmentView, index: number) => {
-                        this.attachmentRow(attachment,
-                          index < (this.viewModel.view?.attachments.length ?? 0) - 1)
-                      }, (attachment: AttachmentView) => attachment.id)
-                  }
-                }
+              if (this.state.viewModel.view.type === 4) {
+                this.identitySection(this.state.viewModel.view)
+              }
 
-                AppGroup({ title: $r('app.string.detail_meta') }) {
-                  if (this.viewModel.folderName.length > 0) {
-                    this.folderIconRow($r('app.string.detail_folder'), this.viewModel.folderName)
-                  }
-                  this.fieldRow($r('app.string.detail_updated'),
-                    formatTimestamp(this.viewModel.view?.revisionDate ?? 0), false,
-                    (): void => {
-                    })
-                  if (this.viewModel.view?.type === 1
-                    && (this.viewModel.view?.passwordHistory.length ?? 0) > 0) {
-                    this.historyEntryRow()
-                  }
-                  Text($r('app.string.menu_delete'))
-                    .fontSize(Typography.body.size)
-                    .lineHeight(Typography.body.lineHeight)
-                    .fontColor($r('app.color.danger'))
+              if ((this.state.viewModel.view?.notes ?? '').length > 0) {
+                AppGroup({ title: $r('app.string.detail_note'),
+                  contentPadding: GroupedList.cardPadding }) {
+                  Text(this.state.viewModel.view?.notes ?? '')
+                    .fontSize(Typography.callout.size)
+                    .lineHeight(Typography.callout.lineHeight)
+                    .fontColor($r('app.color.secondary_label'))
                     .width('100%')
-                    .textAlign(TextAlign.Center)
-                    .constraintSize({ minHeight: Sizes.touchMin })
-                    .onClick(() => {
-                      this.requestDelete();
-                    })
                 }
               }
+
+              if ((this.state.viewModel.view?.fields.length ?? 0) > 0) {
+                AppGroup({ title: $r('app.string.detail_fields') }) {
+                  ForEach(this.state.viewModel.view?.fields ?? [], (field: FieldRowAlias,
+                    index: number) => {
+                    this.customFieldRow(field, index,
+                      index < (this.state.viewModel.view?.fields.length ?? 0) - 1)
+                  }, (_field: FieldRowAlias, index: number) => `${index}`)
+                }
               }
-              .width('100%')
-              .padding({ left: Spacing.page, right: Spacing.page, bottom: Spacing.xxl * 2 })
-              }, (_epoch: number) => _epoch.toString())
+
+              if ((this.state.viewModel.view?.attachments.length ?? 0) > 0) {
+                AppGroup({ title: $r('app.string.detail_attachments') }) {
+                  ForEach(this.state.viewModel.view?.attachments ?? [],
+                    (attachment: AttachmentView, index: number) => {
+                      this.attachmentRow(attachment,
+                        index < (this.state.viewModel.view?.attachments.length ?? 0) - 1)
+                    }, (attachment: AttachmentView) => attachment.id)
+                }
               }
-              .width('100%')
+
+              AppGroup({ title: $r('app.string.detail_meta') }) {
+                if (this.state.viewModel.folderName.length > 0) {
+                  this.folderIconRow($r('app.string.detail_folder'), this.state.viewModel.folderName)
+                }
+                this.fieldRow($r('app.string.detail_updated'),
+                  formatTimestamp(this.state.viewModel.view?.revisionDate ?? 0), false,
+                  (): void => {
+                  })
+                if (this.state.viewModel.view?.type === 1
+                  && (this.state.viewModel.view?.passwordHistory.length ?? 0) > 0) {
+                  this.historyEntryRow()
+                }
+                Text($r('app.string.menu_delete'))
+                  .fontSize(Typography.body.size)
+                  .lineHeight(Typography.body.lineHeight)
+                  .fontColor($r('app.color.danger'))
+                  .width('100%')
+                  .textAlign(TextAlign.Center)
+                  .constraintSize({ minHeight: Sizes.touchMin })
+                  .onClick(() => {
+                    this.requestDelete();
+                  })
+              }
             }
-            .scrollBar(BarState.Off)
-            .edgeEffect(EdgeEffect.Spring)
+            }
             .width('100%')
-            .align(Alignment.Top)
-            .layoutWeight(1)
+            .padding({ left: Spacing.page, right: Spacing.page, bottom: Spacing.xxl * 2 })
+            }, (_epoch: number) => _epoch.toString())
+            }
+            .width('100%')
+          }
           }
           .width('100%')
-          .height('100%')
+          .layoutWeight(1)
         }
-
-        if (this.toastText !== null) {
-          Text(this.toastText)
-            .fontSize(Typography.footnote.size)
-            .lineHeight(Typography.footnote.lineHeight)
-            .fontColor(this.theme.onPrimary)
-            .padding({ left: Spacing.lg, right: Spacing.lg, top: Spacing.sm, bottom: Spacing.sm })
-            .borderRadius(Radius.xs)
-            .backgroundColor($r('app.color.secondary_label'))
-        }
+        .width('100%')
+        .height('100%')
       }
-      .width('100%')
-      .height('100%')
-      .backgroundColor($r('app.color.system_background'))
+
+      if (this.state.toastText !== null) {
+        Text(this.state.toastText)
+          .fontSize(Typography.footnote.size)
+          .lineHeight(Typography.footnote.lineHeight)
+          .fontColor(this.theme.onPrimary)
+          .padding({ left: Spacing.lg, right: Spacing.lg, top: Spacing.sm, bottom: Spacing.sm })
+          .borderRadius(Radius.xs)
+          .backgroundColor($r('app.color.secondary_label'))
+      }
+    }
+    .width('100%')
+    .height('100%')
+    .backgroundColor($r('app.color.system_background'))
+    // 镜像布局基准 = 页面盒高度（底边贴屏幕底，见 GlassTabMirror）
+    .onAreaChange((_oldValue: Area, newValue: Area): void => {
+      if (!this.passive) {
+        this.band.reportViewportHeight(Number(newValue.height), Number(newValue.globalPosition.y));
+      }
+    })
+  }
+}
+
+@Builder
+function itemDetailMirrorBuilder(entry: MirrorPageEntry) {
+  ItemDetailContent({ state: entry.state as ItemDetailState, band: entry.band, passive: true })
+}
+
+const ITEM_DETAIL_MIRROR: WrappedBuilder<[MirrorPageEntry]> = wrapBuilder(itemDetailMirrorBuilder);
+
+/**
+ * 条目详情页外壳（NavDestination）：路由参数、VM 生命周期、镜像登记；内容见 ItemDetailContent。
+ */
+@ComponentV2
+export struct ItemDetailPage {
+  private theme: ThemeState = ThemeService.get().state;
+  private state: ItemDetailState = new ItemDetailState();
+  private band: GlassBandModel = new GlassBandModel();
+  private mirrorEntry: MirrorPageEntry | null = null;
+
+  aboutToAppear(): void {
+    this.setStatusBarContentColor();
+    this.mirrorEntry = new MirrorPageEntry('ItemDetail', this.state, this.band, ITEM_DETAIL_MIRROR);
+    // navDestination 参数在 onReady 回调注入（Index.PagesMap push 传参，plan §1.2）
+  }
+
+  private setStatusBarContentColor(): void {
+    SystemBar.apply(this.theme.isDark);
+  }
+
+  private onReady(param: object): void {
+    const record: Record<string, Object> = param as Record<string, Object>;
+    const id: Object | undefined = record['cipherId'];
+    const backTitle: Object | undefined = record['backTitle'];
+    if (typeof id === 'string') {
+      this.state.cipherId = id as string;
+      this.state.backTitle = typeof backTitle === 'string' ? backTitle as string : '';
+      this.state.viewModel.init(this.state.cipherId);
+    }
+  }
+
+  aboutToDisappear(): void {
+    this.state.viewModel.onDisappear();
+    if (this.mirrorEntry !== null) {
+      MirrorRouter.get().hide(this.mirrorEntry);
+    }
+  }
+
+  build() {
+    NavDestination() {
+      ItemDetailContent({ state: this.state, band: this.band })
     }
     .hideTitleBar(true)
     .ignoreLayoutSafeArea([LayoutSafeAreaType.SYSTEM], [LayoutSafeAreaEdge.BOTTOM])
@@ -884,13 +950,19 @@ export struct ItemDetailPage {
       this.setStatusBarContentColor();
       // 返回本页即重取投影（fix-07）：遮盖期间（编辑页保存）V2 细粒度更新可能不重绘
       // 遮盖页下的 NavDestination 内容，onShown 强制以最新索引重建视图
-      if (this.cipherId.length > 0) {
-        this.viewModel.init(this.cipherId);
+      if (this.state.cipherId.length > 0) {
+        this.state.viewModel.init(this.state.cipherId);
+      }
+      if (this.mirrorEntry !== null) {
+        MirrorRouter.get().show(this.mirrorEntry);
       }
     })
     .onHidden(() => {
-      this.viewModel.passwordVisible = false;
-      this.visibleCustomFieldIndexes = [];
+      this.state.viewModel.passwordVisible = false;
+      this.state.visibleCustomFieldIndexes = [];
+      if (this.mirrorEntry !== null) {
+        MirrorRouter.get().hide(this.mirrorEntry);
+      }
     })
     // 确认弹窗可见时吞掉返回手势/返回键（视为取消），避免弹窗悬在已弹出的页面上
     .onBackPressed((): boolean => {

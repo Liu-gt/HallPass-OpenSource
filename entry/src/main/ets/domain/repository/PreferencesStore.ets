@@ -43,6 +43,8 @@ export class PrefKeys {
   static readonly GLASS_TOGGLE_ENABLED: string = 'glassToggleEnabled';
   /** 液态玻璃滑块控件（试验性，默认 false）：开启后所有 Slider 走 GL 渲染。 */
   static readonly GLASS_SLIDER_ENABLED: string = 'glassSliderEnabled';
+  /** 液态玻璃弹窗（试验性，默认 false）：开启后所有弹窗走液态玻璃样式渲染。 */
+  static readonly GLASS_DIALOG_ENABLED: string = 'glassDialogEnabled';
 }
 
 /**

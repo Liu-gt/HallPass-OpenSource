@@ -66,6 +66,7 @@ export class ThemeService {
           this.applyBrandColors();
         }
       }
+      this.syncGlassDarkMode();
     } catch (err) {
       hilog.warn(DOMAIN, TAG, 'Failed to inspect initial context config: %{public}s', JSON.stringify(err));
     }
@@ -140,6 +141,7 @@ export class ThemeService {
     this.applyBrandColors();
     SystemBar.apply(this.state.isDark);
     this.syncApplicationContext();
+    this.syncGlassDarkMode();
   }
 
   /** EntryAbility.onConfigurationUpdate 转交：跟随系统时刷新品牌色侧别 */
@@ -149,6 +151,7 @@ export class ThemeService {
       this.state.isDark = isDark;
       this.applyBrandColors();
       SystemBar.apply(this.state.isDark);
+      this.syncGlassDarkMode();
     }
   }
 
@@ -170,6 +173,26 @@ export class ThemeService {
       this.appContext.getApplicationContext().setColorMode(target);
     } catch (err) {
       hilog.error(DOMAIN, TAG, 'Failed to set colorMode. Cause: %{public}s', JSON.stringify(err));
+    }
+  }
+
+  private static glassDarkModeHandler?: (dark: boolean) => void;
+
+  /** 注册液态玻璃深色模式同步器（UI 层注入，避免基础服务层静态依赖原生模块） */
+  static registerGlassDarkModeHandler(handler: (dark: boolean) => void): void {
+    ThemeService.glassDarkModeHandler = handler;
+    try {
+      handler(ThemeService.instance.state.isDark);
+    } catch (_e) {
+      // 容错处理
+    }
+  }
+
+  private syncGlassDarkMode(): void {
+    try {
+      ThemeService.glassDarkModeHandler?.(this.state.isDark);
+    } catch (_e) {
+      // 容错处理
     }
   }
 }

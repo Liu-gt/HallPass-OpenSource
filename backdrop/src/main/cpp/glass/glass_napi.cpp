@@ -140,6 +140,80 @@ void DestroyWidget(const std::string &id) {
     }
 }
 
+// ---------------------------------------------------------------------------
+// 玻璃对话框（Dialog）的渲染器注册表
+// ---------------------------------------------------------------------------
+
+struct DialogEntry {
+    GlesRenderer *renderer = nullptr;
+};
+
+std::mutex g_dialogMutex;
+std::unordered_map<std::string, DialogEntry> g_dialogs;
+constexpr int kDialogJoinTimeoutMs = 600;
+std::vector<GlesRenderer *> g_dialogZombies;
+
+void ReapDialogZombiesLocked() {
+    for (auto it = g_dialogZombies.begin(); it != g_dialogZombies.end();) {
+        GlesRenderer *zombie = *it;
+        if (zombie != nullptr && zombie->IsThreadExited()) {
+            zombie->OnSurfaceDestroyed();
+            delete zombie;
+            it = g_dialogZombies.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+bool IsDialogId(const std::string &id) {
+    return id.rfind("glassDialog", 0) == 0;
+}
+
+GlesRenderer *FindDialog(const std::string &id) {
+    std::lock_guard<std::mutex> lock(g_dialogMutex);
+    auto it = g_dialogs.find(id);
+    return it == g_dialogs.end() ? nullptr : it->second.renderer;
+}
+
+GlesRenderer *GetOrCreateDialog(const std::string &id) {
+    std::lock_guard<std::mutex> lock(g_dialogMutex);
+    ReapDialogZombiesLocked();
+    auto it = g_dialogs.find(id);
+    if (it != g_dialogs.end()) {
+        return it->second.renderer;
+    }
+    GlesRenderer *renderer = GlesRenderer::CreateInstance();
+    renderer->SetScene(static_cast<int>(Scene::kDialog));
+    g_dialogs.emplace(id, DialogEntry{renderer});
+    GLOG("dialog renderer created: id=%{public}s", id.c_str());
+    return renderer;
+}
+
+void DestroyDialog(const std::string &id) {
+    GlesRenderer *renderer = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(g_dialogMutex);
+        auto it = g_dialogs.find(id);
+        if (it == g_dialogs.end()) {
+            return;
+        }
+        renderer = it->second.renderer;
+        g_dialogs.erase(it);
+    }
+    if (renderer != nullptr) {
+        if (renderer->OnSurfaceDestroyed(kDialogJoinTimeoutMs)) {
+            delete renderer;
+            GLOG("dialog renderer destroyed: id=%{public}s", id.c_str());
+        } else {
+            GERR("dialog renderer join timeout (%{public}dms), deferred: id=%{public}s",
+                 kDialogJoinTimeoutMs, id.c_str());
+            std::lock_guard<std::mutex> lock(g_dialogMutex);
+            g_dialogZombies.push_back(renderer);
+        }
+    }
+}
+
 /** 触摸 / 尺寸回调共用的 id 读取。 */
 std::string ComponentId(OH_NativeXComponent *component) {
     char id[kMaxIdLen] = {0};
@@ -362,6 +436,19 @@ napi_value SetDensity(napi_env env, napi_callback_info info) {
     double density = 4.0;
     napi_get_value_double(env, args[0], &density);
     GlesRenderer::Instance().SetDensity(static_cast<float>(density));
+    return nullptr;
+}
+
+napi_value SetDarkMode(napi_env env, napi_callback_info info) {
+    size_t argc = 1;
+    napi_value args[1] = {nullptr};
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    if (argc < 1) {
+        return nullptr;
+    }
+    bool dark = false;
+    napi_get_value_bool(env, args[0], &dark);
+    GlesRenderer::Instance().SetDarkMode(dark);
     return nullptr;
 }
 
@@ -591,6 +678,27 @@ napi_value SetContentBand(napi_env env, napi_callback_info info) {
     return nullptr;
 }
 
+/** (extraTopVp: number)：镜像实际导出的上沿余量（< 0 = 与条带余量相同）。 */
+napi_value SetContentExport(napi_env env, napi_callback_info info) {
+    size_t argc = 1;
+    napi_value args[1] = {nullptr};
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    if (argc < 1) {
+        return nullptr;
+    }
+    double extraTop = -1.0;
+    napi_get_value_double(env, args[0], &extraTop);
+    GlesRenderer::Instance().SetContentExport(static_cast<float>(extraTop));
+    return nullptr;
+}
+
+/** () => boolean：页签中枢在跑且收到过镜像帧（弹窗可走实时背景）。 */
+napi_value SharedBackdropReady(napi_env env, napi_callback_info /*info*/) {
+    napi_value result = nullptr;
+    napi_get_boolean(env, GlesRenderer::SharedBackdropReady(), &result);
+    return result;
+}
+
 napi_value GetFrameMirrorOffset(napi_env env, napi_callback_info /*info*/) {
     napi_value result = nullptr;
     napi_create_double(env, static_cast<double>(GlesRenderer::Instance().FrameMirrorOffset()),
@@ -785,6 +893,258 @@ napi_value WidgetDispose(napi_env env, napi_callback_info info) {
 }
 
 // ---------------------------------------------------------------------------
+// 玻璃对话框（Dialog）：配置 / 背景设置 / 按压 / 释放
+// ---------------------------------------------------------------------------
+
+/** (id: string, buttonCount: number, panelHeightDp: number, density: number, dark: boolean) */
+napi_value DialogConfigure(napi_env env, napi_callback_info info) {
+    size_t argc = 5;
+    napi_value args[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    if (argc < 4 || args[0] == nullptr) {
+        return nullptr;
+    }
+    const std::string id = ReadId(env, args[0]);
+    if (!IsDialogId(id)) {
+        return nullptr;
+    }
+    int32_t buttonCount = 1;
+    double panelHeightDp = 0.0;
+    double density = 4.0;
+    bool dark = false;
+    napi_get_value_int32(env, args[1], &buttonCount);
+    napi_get_value_double(env, args[2], &panelHeightDp);
+    napi_get_value_double(env, args[3], &density);
+    if (argc >= 5 && args[4] != nullptr) {
+        napi_get_value_bool(env, args[4], &dark);
+    }
+    GlesRenderer *renderer = GetOrCreateDialog(id);
+    renderer->SetDensity(static_cast<float>(density));
+    renderer->SetDarkMode(dark);
+    renderer->SetDialogConfig(buttonCount, static_cast<float>(panelHeightDp), true /* custom text */);
+    GLOG("dialog configure: id=%{public}s buttons=%{public}d heightDp=%{public}.1f density=%{public}.2f dark=%{public}d",
+         id.c_str(), buttonCount, panelHeightDp, density, dark ? 1 : 0);
+    return nullptr;
+}
+
+/** (id: string, data: ArrayBuffer, width: number, height: number, stride: number) */
+napi_value DialogSetBackdrop(napi_env env, napi_callback_info info) {
+    size_t argc = 5;
+    napi_value args[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    if (argc < 5 || args[0] == nullptr || args[1] == nullptr) {
+        return nullptr;
+    }
+    const std::string id = ReadId(env, args[0]);
+    if (!IsDialogId(id)) {
+        return nullptr;
+    }
+    bool isAb = false;
+    napi_is_arraybuffer(env, args[1], &isAb);
+    if (!isAb) {
+        GERR("DialogSetBackdrop: argument is not ArrayBuffer");
+        return nullptr;
+    }
+    void *data = nullptr;
+    size_t length = 0;
+    napi_get_arraybuffer_info(env, args[1], &data, &length);
+    int32_t width = 0;
+    int32_t height = 0;
+    int32_t stride = 0;
+    napi_get_value_int32(env, args[2], &width);
+    napi_get_value_int32(env, args[3], &height);
+    napi_get_value_int32(env, args[4], &stride);
+
+    GlesRenderer *renderer = FindDialog(id);
+    if (renderer != nullptr) {
+        renderer->SetBackdropData(data, length, width, height, stride);
+        GLOG("dialog set backdrop: id=%{public}s %{public}dx%{public}d stride=%{public}d",
+             id.c_str(), width, height, stride);
+    }
+    return nullptr;
+}
+
+/** (id: string, buttonIndex: number, pressed: boolean) */
+napi_value DialogSetPress(napi_env env, napi_callback_info info) {
+    size_t argc = 3;
+    napi_value args[3] = {nullptr, nullptr, nullptr};
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    if (argc < 3 || args[0] == nullptr) {
+        return nullptr;
+    }
+    const std::string id = ReadId(env, args[0]);
+    if (!IsDialogId(id)) {
+        return nullptr;
+    }
+    int32_t buttonIndex = 0;
+    bool pressed = false;
+    napi_get_value_int32(env, args[1], &buttonIndex);
+    napi_get_value_bool(env, args[2], &pressed);
+    GlesRenderer *renderer = FindDialog(id);
+    if (renderer != nullptr) {
+        renderer->SetDialogPress(buttonIndex, pressed);
+    }
+    return nullptr;
+}
+
+/** (id: string, cardX: number, cardY: number, cardW: number, cardH: number, buttons?: Array<{x: number, y: number, w: number, h: number}>) */
+napi_value DialogSetGeometry(napi_env env, napi_callback_info info) {
+    size_t argc = 6;
+    napi_value args[6] = {nullptr};
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    if (argc < 5 || args[0] == nullptr) {
+        return nullptr;
+    }
+    const std::string id = ReadId(env, args[0]);
+    if (!IsDialogId(id)) {
+        return nullptr;
+    }
+    double cardX = 0, cardY = 0, cardW = 0, cardH = 0;
+    napi_get_value_double(env, args[1], &cardX);
+    napi_get_value_double(env, args[2], &cardY);
+    napi_get_value_double(env, args[3], &cardW);
+    napi_get_value_double(env, args[4], &cardH);
+
+    std::vector<RectF> buttons;
+    if (argc >= 6 && args[5] != nullptr) {
+        bool isArray = false;
+        napi_is_array(env, args[5], &isArray);
+        if (isArray) {
+            uint32_t len = 0;
+            napi_get_array_length(env, args[5], &len);
+            for (uint32_t i = 0; i < len; i++) {
+                napi_value elem = nullptr;
+                napi_get_element(env, args[5], i, &elem);
+                if (elem != nullptr) {
+                    napi_value nx = nullptr, ny = nullptr, nw = nullptr, nh = nullptr;
+                    napi_get_named_property(env, elem, "x", &nx);
+                    napi_get_named_property(env, elem, "y", &ny);
+                    napi_get_named_property(env, elem, "w", &nw);
+                    napi_get_named_property(env, elem, "h", &nh);
+                    double bx = 0, by = 0, bw = 0, bh = 0;
+                    if (nx) napi_get_value_double(env, nx, &bx);
+                    if (ny) napi_get_value_double(env, ny, &by);
+                    if (nw) napi_get_value_double(env, nw, &bw);
+                    if (nh) napi_get_value_double(env, nh, &bh);
+                    buttons.push_back(RectF{static_cast<float>(bx), static_cast<float>(by),
+                                            static_cast<float>(bw), static_cast<float>(bh)});
+                }
+            }
+        }
+    }
+
+    GlesRenderer *renderer = FindDialog(id);
+    if (renderer != nullptr) {
+        GLOG("dialog set geometry: id=%{public}s card=[%{public}.1f, %{public}.1f, %{public}.1f, %{public}.1f] btns=%{public}zu",
+             id.c_str(), cardX, cardY, cardW, cardH, buttons.size());
+        for (size_t i = 0; i < buttons.size(); i++) {
+            GLOG("  btn[%{public}zu]=[%{public}.1f, %{public}.1f, %{public}.1f, %{public}.1f]", i, buttons[i].x, buttons[i].y, buttons[i].w, buttons[i].h);
+        }
+        renderer->SetDialogGeometry(static_cast<float>(cardX), static_cast<float>(cardY),
+                                    static_cast<float>(cardW), static_cast<float>(cardH),
+                                    buttons);
+    }
+    return nullptr;
+}
+
+/** (id: string, x: number, y: number, w: number, h: number)：快照在 surface 里的矩形（px）。 */
+napi_value DialogSetBackdropRect(napi_env env, napi_callback_info info) {
+    size_t argc = 5;
+    napi_value args[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    if (argc < 5 || args[0] == nullptr) {
+        return nullptr;
+    }
+    const std::string id = ReadId(env, args[0]);
+    GlesRenderer *renderer = IsDialogId(id) ? FindDialog(id) : nullptr;
+    if (renderer == nullptr) {
+        return nullptr;
+    }
+    double v[4] = {0.0, 0.0, 0.0, 0.0};
+    for (int i = 0; i < 4; i++) {
+        napi_get_value_double(env, args[i + 1], &v[i]);
+    }
+    renderer->SetDialogBackdropRect(static_cast<float>(v[0]), static_cast<float>(v[1]),
+                                    static_cast<float>(v[2]), static_cast<float>(v[3]));
+    return nullptr;
+}
+
+/** (id: string, x: number, y: number, w: number, h: number)：实时背景纹理在 surface 里的矩形（px）。 */
+napi_value DialogSetLiveRect(napi_env env, napi_callback_info info) {
+    size_t argc = 5;
+    napi_value args[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    if (argc < 5 || args[0] == nullptr) {
+        return nullptr;
+    }
+    const std::string id = ReadId(env, args[0]);
+    GlesRenderer *renderer = IsDialogId(id) ? FindDialog(id) : nullptr;
+    if (renderer == nullptr) {
+        return nullptr;
+    }
+    double v[4] = {0.0, 0.0, 0.0, 0.0};
+    for (int i = 0; i < 4; i++) {
+        napi_get_value_double(env, args[i + 1], &v[i]);
+    }
+    renderer->SetDialogLiveRect(static_cast<float>(v[0]), static_cast<float>(v[1]),
+                                static_cast<float>(v[2]), static_cast<float>(v[3]));
+    return nullptr;
+}
+
+/** (id: string, scale: number, pivotX: number, pivotY: number)：出现 / 消失动效的整体缩放（px）。 */
+napi_value DialogSetTransform(napi_env env, napi_callback_info info) {
+    size_t argc = 4;
+    napi_value args[4] = {nullptr, nullptr, nullptr, nullptr};
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    if (argc < 4 || args[0] == nullptr) {
+        return nullptr;
+    }
+    const std::string id = ReadId(env, args[0]);
+    GlesRenderer *renderer = IsDialogId(id) ? FindDialog(id) : nullptr;
+    if (renderer == nullptr) {
+        return nullptr;
+    }
+    double v[3] = {1.0, 0.0, 0.0};
+    for (int i = 0; i < 3; i++) {
+        napi_get_value_double(env, args[i + 1], &v[i]);
+    }
+    renderer->SetDialogTransform(static_cast<float>(v[0]), static_cast<float>(v[1]),
+                                 static_cast<float>(v[2]));
+    return nullptr;
+}
+
+/** (id: string) => boolean：首帧（真实背景 + 卡片几何）已交给 surface。 */
+napi_value DialogIsReady(napi_env env, napi_callback_info info) {
+    size_t argc = 1;
+    napi_value args[1] = {nullptr};
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    bool ready = false;
+    if (argc >= 1 && args[0] != nullptr) {
+        const std::string id = ReadId(env, args[0]);
+        GlesRenderer *renderer = IsDialogId(id) ? FindDialog(id) : nullptr;
+        ready = renderer != nullptr && renderer->IsDialogPresented();
+    }
+    napi_value result = nullptr;
+    napi_get_boolean(env, ready, &result);
+    return result;
+}
+
+/** (id: string)：弹窗卸载时释放渲染实例（线程 + EGL + GL 资源）。 */
+napi_value DialogDispose(napi_env env, napi_callback_info info) {
+    size_t argc = 1;
+    napi_value args[1] = {nullptr};
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    if (argc < 1 || args[0] == nullptr) {
+        return nullptr;
+    }
+    const std::string id = ReadId(env, args[0]);
+    if (IsDialogId(id)) {
+        DestroyDialog(id);
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
 // 页签切换回调（原生 -> JS，与菜单回调同一套 threadsafe function 机制）
 // ---------------------------------------------------------------------------
 
@@ -975,6 +1335,10 @@ void XcOnSurfaceCreated(OH_NativeXComponent *component, void *window) {
         GetOrCreateWidget(id)->OnSurfaceCreated(window, w, h);
         return;
     }
+    if (IsDialogId(id)) {
+        GetOrCreateDialog(id)->OnSurfaceCreated(window, w, h);
+        return;
+    }
     GlesRenderer::Instance().OnSurfaceCreated(window, w, h, id);
 }
 
@@ -987,6 +1351,13 @@ void XcOnSurfaceChanged(OH_NativeXComponent *component, void *window) {
          static_cast<unsigned long long>(w), static_cast<unsigned long long>(h));
     if (IsWidgetId(id)) {
         GlesRenderer *renderer = FindWidget(id);
+        if (renderer != nullptr) {
+            renderer->OnSurfaceChanged(w, h);
+        }
+        return;
+    }
+    if (IsDialogId(id)) {
+        GlesRenderer *renderer = FindDialog(id);
         if (renderer != nullptr) {
             renderer->OnSurfaceChanged(w, h);
         }
@@ -1009,6 +1380,14 @@ void XcOnSurfaceDestroyed(OH_NativeXComponent *component, void * /*window*/) {
         }
         return;
     }
+    if (IsDialogId(id)) {
+        GlesRenderer *renderer = FindDialog(id);
+        if (renderer != nullptr && !renderer->OnSurfaceDestroyed(kDialogJoinTimeoutMs)) {
+            GERR("dialog surface destroyed: join timeout, keep instance: id=%{public}s",
+                 id.c_str());
+        }
+        return;
+    }
     GlesRenderer::Instance().OnSurfaceDestroyed();
 }
 
@@ -1019,11 +1398,11 @@ void XcOnSurfaceDestroyed(OH_NativeXComponent *component, void * /*window*/) {
  * 它是误触源（点按钮会顺带切调试模式），已移除。需要消融对比时用
  * `GlassGLSetDebugMode` 显式设置。
  *
- * 内联玻璃控件的交互由覆盖在上层的 ArkUI Toggle / Slider 处理，原生不接管触摸。
+ * 内联玻璃控件与弹窗的交互由覆盖在上层的 ArkUI 处理，原生不接管触摸。
  */
 void XcDispatchTouchEvent(OH_NativeXComponent *component, void *window) {
     const std::string id = ComponentId(component);
-    if (IsWidgetId(id)) {
+    if (IsWidgetId(id) || IsDialogId(id)) {
         return;
     }
     OH_NativeXComponent_TouchEvent touchEvent;
@@ -1053,9 +1432,9 @@ void RegisterNativeXComponent(napi_env env, napi_value exports) {
     uint64_t idLen = sizeof(id);
     OH_NativeXComponent_GetXComponentId(component, id, &idLen);
 
-    // 只接管 GL 页与内联控件自己的 XComponent：其它同样以 `libraryname: 'backdrop'`
+    // 只接管 GL 页与内联控件、弹窗自己的 XComponent：其它同样以 `libraryname: 'backdrop'`
     // 注册的 XComponent 也会走到本模块的 Init，若不按 id 排除，渲染器会接管错误的 surface。
-    if (strcmp(id, "glassSurface") != 0 && !IsWidgetId(id)) {
+    if (strcmp(id, "glassSurface") != 0 && !IsWidgetId(id) && !IsDialogId(id)) {
         GLOG("RegisterNativeXComponent: skip non-GL surface (id=%{public}s)", id);
         return;
     }

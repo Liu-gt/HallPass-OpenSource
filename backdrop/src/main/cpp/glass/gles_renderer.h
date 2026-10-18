@@ -5,15 +5,19 @@
 #include <EGL/eglplatform.h>
 #include <GLES3/gl3.h>
 #include <native_image/native_image.h>
+#include <native_vsync/native_vsync.h>
 
 #include <atomic>
 #include <condition_variable>
 
 #include "glass_params.h"
 #include "glass_scene.h"
+#include "perf_probe.h"
+#include "shared_backdrop.h"
 #include <cstdint>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include <thread>
 
@@ -37,6 +41,13 @@ struct Rect {
     float y = 0.0f;
     float width = 0.0f;
     float height = 0.0f;
+};
+
+struct RectF {
+    float x = 0.0f;
+    float y = 0.0f;
+    float w = 0.0f;
+    float h = 0.0f;
 };
 
 enum class ConsumerType { TabBar, GenericGlass };
@@ -93,8 +104,50 @@ public:
     /** 显示密度（vp -> px）。ArkTS 侧在页面上报，缺省 4。 */
     void SetDensity(float density) {
         params_.SetDensity(density);
+        labelsDirty_.store(true);
+        contentTextDirty_.store(true);
+        overlayTextDirty_.store(true);
+        dialogBtnLabelDirty_.store(true);
+        forceRedraw_.store(true);
         RequestRedraw();
     }
+
+    /** 深浅色模式同步（深色模式下弹窗等组件自动切换暗色通透玻璃与浅色文字）。 */
+    void SetDarkMode(bool dark);
+    bool IsDarkMode() const { return darkMode_.load(); }
+
+    /** 对话框配置：按钮数量（0/1/2）、自定义高度（dp，0=默认209dp）、是否自定义文本（true=不绘制demo文本）。 */
+    void SetDialogConfig(int buttonCount, float panelHeightDp, bool custom);
+    /** 对话框按钮按压同步。 */
+    void SetDialogPress(int index, bool pressed);
+
+    /** 设置对话框精确几何布局（ArkTS 侧通过 onAreaChange 上报屏幕顶层像素坐标，内部转 GL 坐标）。 */
+    void SetDialogGeometry(float cardX, float cardY, float cardW, float cardH,
+                           const std::vector<RectF> &buttons);
+    /** 对话框已带着真实背景 + 几何交出首帧（ArkTS 文字层据此淡入，避免文字先于玻璃出现）。 */
+    bool IsDialogPresented() const { return dialogPresented_.load(); }
+    /** 背景快照在 surface 里的矩形（px，左上原点）；不设则按 cover 居中（demo 壁纸）。 */
+    void SetDialogBackdropRect(float x, float y, float w, float h);
+    /**
+     * 实时背景（共享镜像纹理）在本 surface 里的矩形（px，左上原点）；w <= 0 关闭、回退快照。
+     * 只有建上下文时成功加入中枢 share group 的弹窗才会真正用上。
+     */
+    void SetDialogLiveRect(float x, float y, float w, float h);
+    /**
+     * 出现 / 消失动效（HallPass 嵌入式弹窗）：整体绕 pivot（surface px，左上原点）缩放 scale。
+     * 由原生按变换后的真实屏幕位置画玻璃，折射全程采样真实背景（ArkUI 只缩放文字层）。
+     */
+    void SetDialogTransform(float scale, float pivotX, float pivotY);
+
+    /**
+     * 中枢（页签渲染器）：镜像树实际导出的上沿余量（vp，< 0 = 与条带余量相同）。
+     * 有整屏消费者时 ArkTS 把镜像放开到整页，纹理比页签条带高；页签自己只从底部裁条带。
+     */
+    void SetContentExport(float extraTopVp);
+    /** 中枢已就位且收到过内容帧：弹窗可以走实时背景。 */
+    static bool SharedBackdropReady();
+    /** 主树当前滚动偏移（vp，含外推）：共享背景消费者做滞后补偿用。 */
+    static float SharedContentOffsetVp();
 
     /** 消融/调试：0=正常 1=只画背景 2=只画折射 3=不画玻璃 */
     void SetDebugMode(int mode);
@@ -324,6 +377,25 @@ private:
     GlesRenderer(const GlesRenderer &) = delete;
     GlesRenderer &operator=(const GlesRenderer &) = delete;
 
+    /**
+     * glGetUniformLocation 的缓存：每帧 ~170 次驱动侧字符串查找换成哈希表查找。
+     * name 必须是**字符串字面量**（按指针做键）；程序重建（DestroyGl）时清空。
+     */
+    GLint Uniform(GLuint program, const char *name);
+    struct UniformKey {
+        GLuint program;
+        const char *name;
+        bool operator==(const UniformKey &other) const {
+            return program == other.program && name == other.name;
+        }
+    };
+    struct UniformKeyHash {
+        size_t operator()(const UniformKey &key) const {
+            return std::hash<const void *>()(key.name) ^ (static_cast<size_t>(key.program) * 0x9E3779B97F4A7C15ull);
+        }
+    };
+    std::unordered_map<UniformKey, GLint, UniformKeyHash> uniformCache_;
+
     // ---- 渲染线程内部 ----
     void RenderLoop(void *window);
     bool InitEgl(void *window);
@@ -337,8 +409,31 @@ private:
     /**
      * 节拍等待：睡到下一个时间点（交互中 120fps，其余 60fps），
      * **但有信号（内容帧 / 位移 / 触摸）就立刻返回 true** —— 那一帧不等节拍直接画。
+     * 只在拿不到 vsync（OH_NativeVSync 建不起来）时兜底用，正常走 WaitForRenderSlot。
      */
     bool PaceFrame();
+
+    // -------------------------------------------------------------------------
+    // vsync 对齐出帧（页签中枢 / 弹窗实例）
+    //
+    // 交出的帧在**下一个 vsync** 才被取走（SURFACE：RS 合成时；TEXTURE：UI 线程帧内 vsync + ~0.8ms），
+    // 两次取走之间交出的帧只有最后一张会上屏：多画的是白白浪费 GPU，TEXTURE 下还会把 5 张的
+    // buffer 队列塞满、让 RequestBuffer 阻塞（基线实测滚动时 15% 的帧被覆盖、累计阻塞 ~2s/14s）。
+    // 所以每个 vsync 周期最多画一帧，出帧点放在 vsync + δ：本周期的主树偏移（+0.5ms）与
+    // 大部分镜像帧（+2ms）都已到齐，离被取走还留 ~3ms。
+    // -------------------------------------------------------------------------
+
+    /** 渲染线程：建 vsync 连接（失败则退回 PaceFrame 的时间节拍）。 */
+    void CreateVsync();
+    void DestroyVsync();
+    /** 请求下一次 vsync 回调（一次性；同一周期内重复请求只回调一次）。 */
+    void RequestVsync();
+    static void OnVsyncCallback(long long timestamp, void *data);
+    /**
+     * 本轮能否立刻画：true = 画；false = 已经按节拍等过（回顶部重新消费输入再画）。
+     * 规则：本 vsync 周期已画过 / 离下个 vsync 太近 → 等下一个 vsync；否则等到 vsync + δ。
+     */
+    bool WaitForRenderSlot();
 
     /**
      * 唤醒渲染线程：置信号 + notify（可从任意线程调用，只做两件原子事）。
@@ -347,6 +442,9 @@ private:
      * 白白多 1 帧（120Hz 上还带相位抖动）。所有"会改变画面"的入口都要带上它。
      */
     void NotifyFrame();
+
+    /** 置停止标志并叫醒渲染线程的所有等待（空闲 / 暂停 / 节拍 / 内联控件），不丢唤醒。 */
+    void SignalStop();
 
     /** 等在信号上（超时 timeoutMs）；返回 true = 被信号唤醒（stop 也算）。 */
     bool WaitFrame(int timeoutMs);
@@ -417,6 +515,9 @@ private:
         float shadowSpreadV = 0.0f;
         float innerRadiusPx = 0.0f;
         float innerAlpha = 0.0f;
+        float g2Factor = 0.45f;          // G2 连续曲率平滑系数（0 = 标准圆弧，0.45 = 默认 G2）
+        float rimClarity = 0.38f;        // 边缘清晰折射采样混入比例（0..1）
+        float bevelAlphaScale = 0.68f;   // 边缘折射棱面处表面底色保留比例（0..1）
         /** 内阴影顶部掩码：0 = 沿内缘均匀；1 = 用 innerTopCut 的纵向截止掩码。 */
         float innerTopBias = 0.0f;
         /** 顶部掩码截止比例（0..1，按高度从顶往下量）：0.75 = 顶部往下 75% 内有内阴影。 */
@@ -433,6 +534,15 @@ private:
         // 采样源用**背景**而不是 sceneTex_。用于"要画进 sceneTex_ 的底层玻璃"：
         // 目标纹理 == 采样纹理会构成 GL 的读写反馈（未定义行为），换成 bgTex_ 即可避免。
         bool useBackground = false;
+        // 平滑高斯模糊（RenderBlurSmooth）：blurRadiusPx 按 sigma 解释。HallPass 嵌入式弹窗用，
+        // 背景是带文字的 UI，主模糊链的大步距 9-tap 会把文字采成多份错位重影。
+        bool smoothBlur = false;
+        // 平滑模糊只需在这个矩形（屏幕 px，GL 坐标）内有效：各级降采样按比例裁剪（nullptr = 整屏）。
+        const RectF *blurClip = nullptr;
+        // 玻璃本体只需画在这个矩形内（与"形状 + 投影外扩"的裁剪盒取交集；nullptr = 不额外裁）。
+        const RectF *drawClip = nullptr;
+        // GPU 计时归到哪个 pass（GLASS_PERF_PROBE；< 0 = 不计，由调用方的作用域统一计）。
+        int gpuPass = -1;
     };
 
     /** 纯色圆角矩形描述（轨道 / 填充 / 卡片 / 按钮底色）。 */
@@ -522,6 +632,14 @@ private:
     void DrawContentText(int w, int h);
     void DrawOverlayText(int w, int h);
 
+    // 对话框按钮的独立文字纹理（随按钮按压缩放同步缩放）
+    GLuint dialogBtnLabelTex_ = 0;
+    int dialogBtnLabelW_ = 0;
+    int dialogBtnLabelH_ = 0;
+    std::atomic<bool> dialogBtnLabelDirty_{true};
+    std::atomic<bool> darkMode_{false};
+    bool UploadDialogBtnLabel(int w, int h);
+
     /** 控制中心 / 游乐场的飞机图标（一次性栅格化）。 */
     GLuint planeIconTex_ = 0;
     int planeIconSizePx_ = 0;
@@ -575,10 +693,52 @@ private:
     float sliderScaleY_ = 1.0f;
     float sliderScaleYVel_ = 0.0f;
 
-    // 对话框按钮按压
+    // 对话框按钮按压与弹簧缩放
     float dialogPress_[2] = {0.0f, 0.0f};
     float dialogPressVel_[2] = {0.0f, 0.0f};
     int dialogDown_ = -1;
+    float dialogScale_ = 1.0f;
+    float dialogScaleVel_ = 0.0f;
+    std::atomic<int> dialogButtonCount_{1};
+    std::atomic<float> dialogPanelHeightDp_{0.0f};
+    std::atomic<bool> dialogCustom_{false};
+    std::atomic<bool> dialogGeoCustom_{false};
+    std::atomic<bool> dialogPresented_{false};
+    bool photoUploaded_ = false;
+    RectF dialogPhotoRect_{0.0f, 0.0f, 0.0f, 0.0f};   // dialogGeoMutex_ 保护
+    bool dialogPhotoMapped_ = false;
+    RectF dialogLiveRect_{0.0f, 0.0f, 0.0f, 0.0f};    // dialogGeoMutex_ 保护
+    bool dialogLiveEnabled_ = false;
+    float dialogXfScale_ = 1.0f;      // dialogGeoMutex_ 保护
+    float dialogXfPivotX_ = 0.0f;
+    float dialogXfPivotY_ = 0.0f;
+    bool liveDrawn_ = false;          // 渲染线程独占：已用实时背景画过（首帧就绪判定）
+
+    // ---- 共享实时背景（见 shared_backdrop.h）----
+    bool IsHub() const { return this == &Instance(); }
+    /** 消费者：建 EGL 上下文时是否加入中枢 share group（弹窗实例）。 */
+    bool WantsSharedBackdrop() const;
+    /** 中枢：把外部内容纹理整幅 blit 进共享槽并发布。 */
+    bool PublishSharedBackdrop();
+    /** 中枢：实际导出纹理的总余量（px，上 + 下）。 */
+    int ContentExportExtraPx() const;
+    std::atomic<float> contentExportExtraTopVp_{-1.0f};
+    /** 导出余量改了、还没收到按新尺寸渲染的帧：这期间不发布（外纹理里还是旧尺寸的帧）。 */
+    std::atomic<bool> exportPending_{false};
+    /** 手里这帧外纹理对应的导出余量（px，出帧时锁存；-1 = 未锁存，按当前设置算）。 */
+    int frameExportExtraPx_ = -1;
+    /** 上次发布因两槽都在用而跳过：下一轮重试（页面静止时不会再有新帧来触发）。 */
+    bool sharedRetry_ = false;
+    GLuint sharedTex_[2] = {0, 0};
+    GLuint sharedFbo_[2] = {0, 0};
+    int sharedW_[2] = {0, 0};
+    int sharedH_[2] = {0, 0};
+    uint64_t sharedGen_ = 0;          // 消费者：加入的中枢代际（0 = 未共享）
+    int sharedReaderToken_ = 0;
+    bool carryActive_ = false;   // 渲染线程：上一轮已判定要画、节拍被打断后带到下一轮   // 渲染线程独占：真实背景已上传（区别于 1×1 占位纹理）
+    std::mutex dialogGeoMutex_;
+    RectF dialogCardTopDown_{0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<RectF> dialogBtnsTopDown_;
 
     // 控制中心：展开进度（1 = 展开）
     float ccProgress_ = 1.0f;
@@ -648,6 +808,13 @@ private:
     float blurCacheRadius_ = -1.0f;
     GLuint blurCacheTex_ = 0;
     GLuint blurCacheSrc_ = 0;
+    /**
+     * 平滑模糊的帧内缓存（嵌入式弹窗：面板玻璃先画进 sceneTex_、再画到屏幕，两次同源同 sigma）。
+     * 降采样金字塔被别的模糊复用时失效（RenderBlur 金字塔路径 / 不同键的 RenderBlurSmooth）。
+     */
+    GLuint smoothCacheSrc_ = 0;
+    float smoothCacheSigma_ = -1.0f;
+    GLuint smoothCacheTex_ = 0;
 
     std::thread thread_;
     std::atomic<bool> running_{false};
@@ -700,9 +867,17 @@ private:
     GLuint BlurFullRes(GLuint sourceTex, float radiusPx, GLuint fboPair[2], GLuint texPair[2]);
     /** 按钮专用模糊：全分辨率 + scissor（按钮半径通常较小，裁剪比降采样更省）。 */
     GLuint RenderButtonBlur(GLuint sourceTex, float radiusPx);
-    /** 主模糊链：小半径全分辨率；大半径走降采样金字塔。返回可直接线性采样的纹理。 */
-    GLuint RenderBlur(GLuint sourceTex, float radiusPx);
-    GLuint sceneFbo_ = 0;   // 背景 + 底板玻璃（不含文字；指示器要采样它）
+    /**
+     * 主模糊链：小半径全分辨率；大半径走降采样金字塔。返回可直接线性采样的纹理。
+     * clip（屏幕 px，GL 坐标）只作用于全分辨率路径：结果只在该矩形内有效（外面是旧内容）。
+     */
+    GLuint RenderBlur(GLuint sourceTex, float radiusPx, const RectF *clip = nullptr);
+    /**
+     * 无重影高斯模糊：两级 2×2 盒式降采样到 1/4 分辨率，再迭代小步距可分离 pass 叠到目标 sigma。
+     * clip（屏幕 px，GL 坐标）：结果只需在该矩形内有效，每级按比例裁剪（调用方保证矩形已含模糊支撑）。
+     */
+    GLuint RenderBlurSmooth(GLuint sourceTex, float sigmaPx, const RectF *clip = nullptr);
+    GLuint sceneFbo_ = 0;  // 背景 + 底板玻璃（不含文字；指示器要采样它）
     GLuint sceneTex_ = 0;
     GLuint labelTex_ = 0;   // 文字位图（native_drawing 栅格化，整条为**常态色**）
     // 凸显色文字位图：与 labelTex_ **逐像素同布局**，只在指示器内部按同一折射 UV
@@ -840,7 +1015,21 @@ private:
     bool scrolling_ = false;   // 指针事件之间的瞬时速度（由 OnTouch 写、UpdateAnim 读）
     std::mutex animMutex_;
     int64_t lastAnimMs_ = 0;
+    int64_t lastAnimNs_ = 0;   // 页签 / 弹窗实例的弹簧步长基准（纳秒，见 RenderLoop）
     void UpdateAnim(float dtSeconds);
+    /** 判停时弹簧（页签 + 弹窗）的状态（见 SettleSprings）。 */
+    enum class SpringSettle {
+        kFar,       // 还有弹簧离目标较远（欠阻尼弹簧折返点的误判）：当它还在动
+        kSnapped,   // 都贴着目标，已对齐、速度清零，有值被改动：要再画一帧
+        kExact,     // 本来就在目标上
+    };
+    /**
+     * 速率判据判停时调用：页签与弹窗的每根弹簧都贴着目标（kSettle*Tolerance）才对齐目标值、速度清零。
+     * 不对齐的话静止画面停在哪一帧取决于帧时序（判停时离目标还差一点）。
+     */
+    SpringSettle SettleSprings();
+    /** 上一轮弹簧是否还在动（落定的那一轮才对齐一次）。 */
+    bool wasSpringing_ = false;
 
     /**
      * 页签格的内缩（px）。**所有"页签格几何"都必须走这里**：触摸映射（TabValueFromX）、
@@ -895,6 +1084,19 @@ private:
     std::mutex frameWaitMutex_;
     std::condition_variable frameWaitCv_;
 
+    // ---- vsync 对齐出帧（见 WaitForRenderSlot）----
+    OH_NativeVSync *vsync_ = nullptr;
+    /** 渲染线程：本实例的原生窗口（交 buffer 前设期望上屏时间用，见 RenderLoop）。 */
+    void *nativeWindow_ = nullptr;
+    /** 最近一次 vsync 的时间戳（CLOCK_MONOTONIC，ns）与周期（ns）；vsync 线程写、渲染线程读。 */
+    std::atomic<int64_t> vsyncNs_{0};
+    std::atomic<int64_t> vsyncPeriodNs_{0};
+    /** 渲染线程：上一帧画在哪个 vsync 周期（= 当时的 vsyncNs_），同一周期不画第二帧。 */
+    int64_t lastRenderVsyncNs_ = -1;
+    /** 渲染线程：上次查询周期时的 vsync 时间戳（每个新回调查一次）。 */
+    int64_t periodQueriedVsyncNs_ = -1;
+    bool vsyncClockLogged_ = false;
+
     struct TabConfig {
         std::vector<std::string> labels;
         std::vector<std::string> icons;
@@ -925,6 +1127,11 @@ private:
     std::condition_variable widgetWaitCv_;
 
     // ---- FPS 统计 ----
+    /** 各 pass 的 GPU 耗时（GLASS_PERF_PROBE 打开才计，见 perf_probe.h）。 */
+    GpuPassTimer gpuTimer_;
+    /** 本帧采样位移用到的主树偏移 / 外推量（vp，渲染线程独占；trace 打点用）。 */
+    float lastOffsetVp_ = 0.0f;
+    float lastLeadVp_ = 0.0f;
     int frameCount_ = 0;
     int64_t fpsWindowStartMs_ = 0;
     /** 本统计窗口内消费到的内容纹理帧数 / 绘制耗时累计（PERF_GL 诊断用）。 */
